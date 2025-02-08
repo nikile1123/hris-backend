@@ -39,5 +39,19 @@ services:
     depends_on:
       - flyway
 
+  review-service:
+    build:
+      context: .
+      dockerfile: reviews/Dockerfile
+    container_name: review-service
+    environment:
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/hris"
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "Start#123"
+    ports:
+      - "8082:8082"
+    depends_on:
+      - flyway
+
 volumes:
   pgdata:
