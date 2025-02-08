@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: hris
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Start#123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  flyway:
+    image: flyway/flyway:9.16.1
+    container_name: flyway
+    depends_on:
+      - postgres
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/hris
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: Start#123
+    volumes:
+      - ./db/migration:/flyway/sql
+    command: -connectRetries=60 migrate
+
+  employee-service:
+    build:
+      context: .
+      dockerfile: employees/Dockerfile
+    container_name: employee-service
+    environment:
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/hris"
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "Start#123"
+    ports:
+      - "8081:8081"
+    depends_on:
+      - flyway
+
+volumes:
+  pgdata:
