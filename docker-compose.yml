@@ -39,11 +39,10 @@ services:
     depends_on:
       - flyway
 
-
   notification-service:
     build:
       context: .
-      dockerfile: notification/Dockerfile
+      dockerfile: notifications/Dockerfile
     container_name: notification-service
     environment:
       DATABASE_URL: "jdbc:postgresql://postgres:5432/hris"
