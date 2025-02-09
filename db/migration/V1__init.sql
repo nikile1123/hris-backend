@@ -1,6 +1,5 @@
 -- V1__init.sql
 
--- Создание таблицы сотрудников
 CREATE TABLE employees (
                            id UUID PRIMARY KEY,
                            first_name VARCHAR(50) NOT NULL,
@@ -8,6 +7,7 @@ CREATE TABLE employees (
                            email VARCHAR(100) NOT NULL UNIQUE,
                            position VARCHAR(50) NOT NULL,
                            supervisor_id UUID,
+                           subordinates_count INTEGER NOT NULL DEFAULT 0,
                            CONSTRAINT fk_supervisor
                                FOREIGN KEY (supervisor_id)
                                    REFERENCES employees(id)
@@ -46,7 +46,7 @@ CREATE TABLE notifications (
 CREATE TABLE outbox (
                         id UUID PRIMARY KEY,
                         event_type VARCHAR(50) NOT NULL,
-                        payload TEXT NOT NULL,
+                        payload JSONB NOT NULL,
                         processed BOOLEAN DEFAULT FALSE,
                         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
