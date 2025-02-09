@@ -34,12 +34,14 @@ CREATE TABLE performance_reviews
 
 CREATE TABLE outbox
 (
-    id         UUID PRIMARY KEY,
-    event_type VARCHAR(50)  NOT NULL,
-    message    VARCHAR(512) NOT NULL,
-    processed  BOOLEAN     DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    CONSTRAINT fk_employee_outbox FOREIGN KEY (employee_id)
-        REFERENCES employees (id)
+    id          UUID PRIMARY KEY,
+    employee_id           UUID NOT NULL,
+    event_type  VARCHAR(50)  NOT NULL,
+    message     VARCHAR(512) NOT NULL,
+    processed   BOOLEAN     DEFAULT FALSE,
+    created_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_employee_outbox
+        FOREIGN KEY (employee_id)
+            REFERENCES employees (id)
             ON DELETE CASCADE
 );
