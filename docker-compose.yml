@@ -92,6 +92,8 @@ services:
       - "9090:9090"
     depends_on:
       - employee-service
+      - notification-service
+      - review-service
 
   grafana:
     image: grafana/grafana:latest

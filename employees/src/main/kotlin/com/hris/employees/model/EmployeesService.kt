@@ -67,11 +67,6 @@ class EmployeesService(private val database: Database) {
         override val primaryKey = PrimaryKey(id)
     }
 
-
-    init {
-        transaction(database) { SchemaUtils.create(EmployeesTable) }
-    }
-
     suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO, database) { block() }
 
@@ -93,6 +88,7 @@ class EmployeesService(private val database: Database) {
                 }
             }
         }
+
         val mes = "Employee ${employee.firstName} ${employee.lastName} created."
         OutboxTable.insert {
             it[employeeId] = newId

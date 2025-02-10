@@ -68,10 +68,6 @@ class PerformanceReviewService(private val database: Database) {
     private val logger =
         LoggerFactory.getLogger(PerformanceReviewService::class.java)
 
-    init {
-        transaction(database) { SchemaUtils.create(PerformanceReviewsTable) }
-    }
-
     suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
