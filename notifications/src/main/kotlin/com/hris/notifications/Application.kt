@@ -1,11 +1,15 @@
 package com.hris.notifications
 
+import com.hris.notifications.monitoring.configureMonitoring
+import com.hris.notifications.routes.registerRoutes
 import com.hris.notifications.service.NotificationSender
 import com.hris.notifications.service.OutboxRelayService
 import com.hris.notifications.service.RabbitMQNotificationSender
 import com.hris.notifications.service.RabbitMQService
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Database
@@ -19,7 +23,7 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    launchOutboxRelay(DI {
+    val kodein = DI {
         bind<Database>() with singleton {
             Database.connect(
                 url = System.getenv("DATABASE_URL")
@@ -40,7 +44,15 @@ fun Application.module() {
                 instance()
             )
         }
-    })
+        bind<PrometheusMeterRegistry>() with singleton {
+            PrometheusMeterRegistry(
+                PrometheusConfig.DEFAULT
+            )
+        }
+    }
+    configureMonitoring(kodein)
+    registerRoutes(kodein)
+    launchOutboxRelay(kodein)
 }
 
 fun Application.launchOutboxRelay(kodein: DI) {

@@ -38,7 +38,6 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.4")
 
     //Logging
-    implementation("io.ktor:ktor-server-call-logging")
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     //Test
@@ -54,4 +53,9 @@ dependencies {
 
     //Notifications
     implementation("com.rabbitmq:amqp-client:5.24.0")
+
+    //Metrics
+    implementation("io.ktor:ktor-server-call-logging")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.12.13")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$kotlin_version")
 }

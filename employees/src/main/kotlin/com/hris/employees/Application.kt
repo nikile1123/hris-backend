@@ -5,6 +5,8 @@ import com.hris.employees.monitoring.configureMonitoring
 import com.hris.employees.routes.registerRoutes
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.jetbrains.exposed.sql.Database
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -16,7 +18,7 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    registerRoutes(DI {
+    val kodein = DI {
         bind<Database>() with singleton {
             Database.connect(
                 url = System.getenv("DATABASE_URL")
@@ -26,6 +28,12 @@ fun Application.module() {
             )
         }
         bind<EmployeesService>() with singleton { EmployeesService(instance()) }
-    })
-    configureMonitoring()
+        bind<PrometheusMeterRegistry>() with singleton {
+            PrometheusMeterRegistry(
+                PrometheusConfig.DEFAULT
+            )
+        }
+    }
+    registerRoutes(kodein)
+    configureMonitoring(kodein)
 }
