@@ -21,11 +21,11 @@ class RabbitMQService {
     init {
         channel.exchangeDeclare(exchangeName, BuiltinExchangeType.TOPIC, true)
         channel.queueDeclare("ui_notifications", true, false, false, null)
-        channel.queueDeclare("sms_notifications", true, false, false, null)
         channel.queueDeclare("email_notifications", true, false, false, null)
-        channel.queueBind("ui_notifications", exchangeName, "notification.ui.#")
-        channel.queueBind("sms_notifications", exchangeName, "notification.sms.#")
-        channel.queueBind("email_notifications", exchangeName, "notification.email.#")
+        channel.queueBind("ui_notifications", exchangeName, "review.#")
+        channel.queueBind("ui_notifications", exchangeName, "employee.#")
+        channel.queueBind("email_notifications", exchangeName, "review.#")
+        channel.queueBind("email_notifications", exchangeName, "employee.#")
         logger.info("RabbitMQService initialized")
     }
 
