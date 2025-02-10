@@ -2,6 +2,7 @@ val exposed_version: String by project
 val h2_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
+val prometheus_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -38,7 +39,6 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.4")
 
     //Logging
-    implementation("io.ktor:ktor-server-call-logging")
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     //Test
@@ -51,4 +51,9 @@ dependencies {
 
     //DI
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:7.25.0")
+
+    //Metrics
+    implementation("io.ktor:ktor-server-call-logging")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.12.13")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$kotlin_version")
 }

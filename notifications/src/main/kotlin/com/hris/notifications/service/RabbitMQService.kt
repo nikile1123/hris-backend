@@ -29,6 +29,7 @@ class RabbitMQService {
         logger.info("RabbitMQService initialized")
     }
 
+    //TODO: goes only in 1 queue, need to all
     fun publishNotification(routingKey: String, message: String) {
         channel.basicPublish(exchangeName, routingKey, null, message.toByteArray(Charsets.UTF_8))
         logger.info("Published notification with routingKey: $routingKey")
