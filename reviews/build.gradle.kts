@@ -39,7 +39,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-json:$exposed_version")
 
     //Logging
-    implementation("io.ktor:ktor-server-call-logging")
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     //Test
@@ -52,4 +51,9 @@ dependencies {
 
     //DI
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:7.25.0")
+
+    //Metrics
+    implementation("io.ktor:ktor-server-call-logging")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.12.13")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$kotlin_version")
 }

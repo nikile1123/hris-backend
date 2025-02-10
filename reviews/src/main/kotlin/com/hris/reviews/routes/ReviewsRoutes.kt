@@ -9,6 +9,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.util.*
@@ -16,8 +17,12 @@ import java.util.*
 fun Application.registerRoutes(kodein: DI) {
     install(ContentNegotiation) { json() }
     val reviewService by kodein.instance<PerformanceReviewService>()
+    val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()
 
     routing {
+        get("/metrics") {
+            call.respond(appMicrometerRegistry.scrape())
+        }
         route("/performance_reviews") {
             get {
                 val allReviews = reviewService.getAllReviews()

@@ -19,7 +19,9 @@ fun Application.configureMonitoring(kodein: DI) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
     }
+
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()
+
     install(MicrometerMetrics) {
         distributionStatisticConfig = DistributionStatisticConfig.Builder()
             .percentilesHistogram(true)
