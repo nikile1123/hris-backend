@@ -1,0 +1,39 @@
+### Получение списка всех сотрудников
+GET http://localhost:8080/employees
+Accept: application/json
+
+
+### Создание нового сотрудника
+POST http://localhost:8081/employees
+Content-Type: application/json
+
+{
+  "firstName": "petya1223",
+  "lastName": "Doe12",
+  "email": "petya1232.doe1@example.com",
+  "position": "Developer",
+  "supervisorId": "2cca4f21-42c3-4193-a067-23f5c8d98897"
+}
+
+
+### Получение сотрудника по ID
+GET http://localhost:8080/employees/1
+Accept: application/json
+
+
+### Обновление данных сотрудника
+PUT http://localhost:8080/employees/1
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "email": "jane.doe@example.com",
+  "position": "Senior Developer",
+  "supervisorId": null
+}
+
+
+### Удаление сотрудника
+DELETE http://localhost:8080/employees/1
+Accept: application/json

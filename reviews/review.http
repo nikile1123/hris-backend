@@ -1,0 +1,42 @@
+################################################################################
+### Создание нового Performance Review
+POST http://localhost:8083/performance_reviews
+Content-Type: application/json
+
+{
+  "employeeId": "2cde28db-828f-4877-a7c7-1fffe3008ac0",
+  "reviewDate": "2025-02-01",
+  "performance": 8,
+  "softSkills": 7,
+  "independence": 9,
+  "aspirationForGrowth": 8
+}
+
+### Получить список всех Performance Reviews
+GET http://localhost:8083/performance_reviews
+Content-Type: application/json
+
+### Получить Performance Review по ID
+GET http://localhost:8083/performance_reviews/1
+Content-Type: application/json
+
+### Получить Performance Reviews для конкретного сотрудника
+GET http://localhost:8083/performance_reviews/employee/1
+Content-Type: application/json
+
+### Обновление Performance Review
+PUT http://localhost:8083/performance_reviews/1
+Content-Type: application/json
+
+{
+  "employeeId": 1,
+  "reviewDate": "2025-02-01",
+  "performance": 9,
+  "softSkills": 8,
+  "independence": 9,
+  "aspirationForGrowth": 9
+}
+
+### Удаление Performance Review
+DELETE http://localhost:8083/performance_reviews/1
+Content-Type: application/json
