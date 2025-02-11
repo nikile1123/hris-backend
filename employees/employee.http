@@ -8,9 +8,9 @@ POST http://localhost:8081/employees
 Content-Type: application/json
 
 {
-  "firstName": "pet4ya1223",
-  "lastName": "Doe124",
-  "email": "petya412432.doe1@example.com",
+  "firstName": "pet4ya12d23",
+  "lastName": "Doe1ds24",
+  "email": "pedtya412432.doe1@example.com",
   "position": "Developer",
   "supervisorId": null
 }

@@ -1,5 +1,6 @@
 package com.hris.reviews.monitoring
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.plugins.calllogging.*
@@ -15,9 +16,17 @@ import org.slf4j.event.*
 import java.time.Duration
 
 fun Application.configureMonitoring(kodein: DI) {
+    install(CallId) {
+        header(io.ktor.http.HttpHeaders.XRequestId)
+        verify { callId: String ->
+            callId.isNotEmpty()
+        }
+        generate(10, "abcde12345")
+    }
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
+        callIdMdc("call-id")
     }
 
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()

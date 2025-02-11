@@ -1,5 +1,6 @@
 package com.hris.employees.monitoring
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.plugins.callid.*
@@ -16,6 +17,13 @@ import org.slf4j.event.Level
 import java.time.Duration
 
 fun Application.configureMonitoring(kodein: DI) {
+    install(CallId) {
+        header(HttpHeaders.XRequestId)
+        verify { callId: String ->
+            callId.isNotEmpty()
+        }
+        generate(10, "abcde12345")
+    }
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
