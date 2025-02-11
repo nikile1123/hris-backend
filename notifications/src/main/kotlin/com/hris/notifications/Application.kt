@@ -64,7 +64,7 @@ fun Application.launchOutboxRelay(kodein: DI) {
             } catch (e: Exception) {
                 log.error("Failed to process outbox events", e)
             }
-            delay(60000L)
+            delay(10000L)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.hris.employees.model
 
+import com.hris.employees.model.EmployeesService.EmployeesTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -9,6 +10,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.slf4j.LoggerFactory
@@ -39,6 +41,13 @@ data class Employee(
     val position: String,
     @Serializable(with = UUIDSerializer::class)
     val supervisorId: UUID? = null
+)
+
+@Serializable
+data class EmployeeHierarchy(
+    val manager: Employee?,
+    val subordinates: List<Employee>,
+    val colleagues: List<Employee>
 )
 
 
@@ -76,6 +85,71 @@ class EmployeesService(private val database: Database) {
         val createdAt =
             datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
         override val primaryKey = PrimaryKey(id)
+    }
+
+    suspend fun getEmployeeHierarchy(employeeId: UUID): EmployeeHierarchy = dbQuery {
+        // Получаем сотрудника по его идентификатору
+        val employee = EmployeesTable.selectAll()
+            .where { EmployeesTable.id eq employeeId }
+            .map {
+                Employee(
+                    id = it[EmployeesTable.id],
+                    firstName = it[EmployeesTable.firstName],
+                    lastName = it[EmployeesTable.lastName],
+                    email = it[EmployeesTable.email],
+                    position = it[EmployeesTable.position],
+                    supervisorId = it[EmployeesTable.supervisorId],
+                    teamId = it[EmployeesTable.teamId]
+                )
+            }.singleOrNull() ?: throw IllegalArgumentException("Employee not found")
+
+        // Руководитель – тот, чей id указан в поле supervisorId сотрудника
+        val manager = employee.supervisorId?.let { supId ->
+            EmployeesTable.selectAll().where { EmployeesTable.id eq supId }
+                .map {
+                    Employee(
+                        id = it[EmployeesTable.id],
+                        firstName = it[EmployeesTable.firstName],
+                        lastName = it[EmployeesTable.lastName],
+                        email = it[EmployeesTable.email],
+                        position = it[EmployeesTable.position],
+                        supervisorId = it[EmployeesTable.supervisorId],
+                        teamId = it[EmployeesTable.teamId]
+                    )
+                }.singleOrNull()
+        }
+
+        // Подчинённые – все, у кого поле supervisorId равно id сотрудника
+        val subordinates = EmployeesTable.selectAll()
+            .where { EmployeesTable.supervisorId eq employeeId }
+            .map {
+                Employee(
+                    id = it[EmployeesTable.id],
+                    firstName = it[EmployeesTable.firstName],
+                    lastName = it[EmployeesTable.lastName],
+                    email = it[EmployeesTable.email],
+                    position = it[EmployeesTable.position],
+                    supervisorId = it[EmployeesTable.supervisorId],
+                    teamId = it[EmployeesTable.teamId]
+                )
+            }
+
+        // Коллеги – все сотрудники с тем же teamId, кроме самого сотрудника
+        val colleagues = EmployeesTable.selectAll()
+            .where { (EmployeesTable.teamId eq employee.teamId) and (EmployeesTable.id neq employeeId) }
+            .map {
+            Employee(
+                id = it[EmployeesTable.id],
+                firstName = it[EmployeesTable.firstName],
+                lastName = it[EmployeesTable.lastName],
+                email = it[EmployeesTable.email],
+                position = it[EmployeesTable.position],
+                supervisorId = it[EmployeesTable.supervisorId],
+                teamId = it[EmployeesTable.teamId]
+            )
+        }
+
+        EmployeeHierarchy(manager, subordinates, colleagues)
     }
 
     suspend fun <T> dbQuery(block: suspend () -> T): T =

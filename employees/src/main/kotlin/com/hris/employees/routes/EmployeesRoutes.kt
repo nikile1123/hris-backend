@@ -49,6 +49,16 @@ fun Application.registerRoutes(kodein: DI) {
                     call.respond(HttpStatusCode.OK, employee)
                 }
             }
+            get("{id}/hierarchy") {
+                val idParam = call.parameters["id"]
+                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                    return@get
+                }
+                val hierarchy = employeesService.getEmployeeHierarchy(id)
+                call.respond(HttpStatusCode.OK, hierarchy)
+            }
             post {
                 val employee = call.receive<Employee>()
                 val newEmployeeId = employeesService.createEmployee(employee)
