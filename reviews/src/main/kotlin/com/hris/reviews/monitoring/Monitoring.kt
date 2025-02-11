@@ -24,7 +24,7 @@ fun Application.configureMonitoring(kodein: DI) {
         generate(10, "abcde12345")
     }
     install(CallLogging) {
-        level = Level.INFO
+        level = Level.DEBUG
         filter { call -> call.request.path().startsWith("/") }
         callIdMdc("call-id")
     }

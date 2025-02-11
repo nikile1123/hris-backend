@@ -7,7 +7,6 @@ CREATE TABLE teams
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
-
 CREATE TABLE employees
 (
     id                 UUID PRIMARY KEY,
@@ -39,10 +38,15 @@ CREATE TABLE performance_reviews
     soft_skills           INTEGER CHECK (soft_skills BETWEEN 1 AND 10),
     independence          INTEGER CHECK (independence BETWEEN 1 AND 10),
     aspiration_for_growth INTEGER CHECK (aspiration_for_growth BETWEEN 1 AND 10),
+    team_id            UUID         NOT NULL,
     CONSTRAINT fk_employee_review
         FOREIGN KEY (employee_id)
             REFERENCES employees (id)
-            ON DELETE CASCADE
+            ON DELETE CASCADE,
+    CONSTRAINT fk_team
+        FOREIGN KEY (team_id)
+            REFERENCES teams (id)
+            ON DELETE RESTRICT
 );
 
 CREATE TABLE outbox
