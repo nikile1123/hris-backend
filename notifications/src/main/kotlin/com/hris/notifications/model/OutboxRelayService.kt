@@ -54,12 +54,12 @@ class OutboxRelayService(
             events.forEach { event ->
                 try {
                     val routingKey = when (event.eventType.lowercase()) {
-                        "review.created" -> "review.created"
-                        "review.updated" -> "review.updated"
-                        "review.deleted" -> "review.deleted"
-                        "employee.created" -> "employee.created"
-                        "employee.updated" -> "employee.updated"
-                        "employee.deleted" -> "employee.deleted"
+                        "review.created" -> "notification.employee.team.<teamId>"
+                        "review.updated" -> "notification.employee.team.<teamId>"
+                        "review.deleted" -> "notification.employee.team.<teamId>"
+                        "employee.created" -> "notification.review.employee.<employeeId>"
+                        "employee.updated" -> "notification.review.employee.<employeeId>"
+                        "employee.deleted" -> "notification.review.employee.<employeeId>"
                         else -> throw IllegalArgumentException("Unknown event type: ${event.eventType}")
                     }
                     notificationSender.sendNotification(

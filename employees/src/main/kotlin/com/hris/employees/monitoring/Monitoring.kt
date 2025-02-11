@@ -2,6 +2,7 @@ package com.hris.employees.monitoring
 
 import io.ktor.server.application.*
 import io.ktor.server.metrics.micrometer.*
+import io.ktor.server.plugins.callid.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.request.*
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
@@ -18,6 +19,7 @@ fun Application.configureMonitoring(kodein: DI) {
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
+        callIdMdc("call-id")
     }
 
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()

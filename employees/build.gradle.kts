@@ -53,7 +53,8 @@ dependencies {
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:7.25.0")
 
     //Metrics
+    implementation("io.ktor:ktor-server-call-id")
     implementation("io.ktor:ktor-server-call-logging")
     implementation("io.micrometer:micrometer-registry-prometheus:1.12.13")
-    implementation("io.ktor:ktor-server-metrics-micrometer:$kotlin_version")
+    implementation("io.ktor:ktor-server-metrics-micrometer")
 }

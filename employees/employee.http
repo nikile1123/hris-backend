@@ -1,5 +1,5 @@
 ### Получение списка всех сотрудников
-GET http://localhost:8080/employees
+GET http://localhost:8081/employees
 Accept: application/json
 
 
@@ -17,12 +17,12 @@ Content-Type: application/json
 
 
 ### Получение сотрудника по ID
-GET http://localhost:8080/employees/1
+GET http://localhost:8081/employees/f0c65528-8b0a-4855-9959-d4ac667c500e
 Accept: application/json
 
 
 ### Обновление данных сотрудника
-PUT http://localhost:8080/employees/1
+PUT http://localhost:8081/employees/f0c65528-8b0a-4855-9959-d4ac667c500e
 Content-Type: application/json
 
 {
@@ -35,5 +35,5 @@ Content-Type: application/json
 
 
 ### Удаление сотрудника
-DELETE http://localhost:8080/employees/1
+DELETE http://localhost:8081/employees/f0c65528-8b0a-4855-9959-d4ac667c500e
 Accept: application/json
