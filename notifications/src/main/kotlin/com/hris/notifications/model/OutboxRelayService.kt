@@ -16,6 +16,7 @@ object OutboxTable : Table("outbox") {
     val id = uuid("id").clientDefault { UUID.randomUUID() }
     val eventType = varchar("event_type", 50)
     val employeeId = uuid("employee_id")
+    val teamId = uuid("team_id")
     val message = varchar("message", 512)
     val processed = bool("processed").default(false)
     val createdAt =
@@ -26,6 +27,7 @@ object OutboxTable : Table("outbox") {
 data class OutboxEvent(
     val id: UUID,
     val employeeId: UUID,
+    val teamId: UUID,
     val eventType: String,
     val message: String,
     val processed: Boolean,
@@ -45,6 +47,7 @@ class OutboxRelayService(
                     OutboxEvent(
                         id = row[OutboxTable.id],
                         employeeId = row[OutboxTable.employeeId],
+                        teamId = row[OutboxTable.teamId],
                         eventType = row[OutboxTable.eventType],
                         message = row[OutboxTable.message],
                         processed = row[OutboxTable.processed],
@@ -54,12 +57,12 @@ class OutboxRelayService(
             events.forEach { event ->
                 try {
                     val routingKey = when (event.eventType.lowercase()) {
-                        "review.created" -> "notification.employee.team.<teamId>"
-                        "review.updated" -> "notification.employee.team.<teamId>"
-                        "review.deleted" -> "notification.employee.team.<teamId>"
-                        "employee.created" -> "notification.review.employee.<employeeId>"
-                        "employee.updated" -> "notification.review.employee.<employeeId>"
-                        "employee.deleted" -> "notification.review.employee.<employeeId>"
+                        "review.created" -> "notification.employee.team.${event.teamId}"
+                        "review.updated" -> "notification.employee.team.${event.teamId}"
+                        "review.deleted" -> "notification.employee.team.${event.teamId}"
+                        "employee.created" -> "notification.review.employee.${event.employeeId}"
+                        "employee.updated" -> "notification.review.employee.${event.employeeId}"
+                        "employee.deleted" -> "notification.review.employee.${event.employeeId}"
                         else -> throw IllegalArgumentException("Unknown event type: ${event.eventType}")
                     }
                     notificationSender.sendNotification(
@@ -83,6 +86,7 @@ class OutboxRelayService(
         return Notification(
             id = UUID.randomUUID(),
             employeeId = event.employeeId,
+            teamId = event.teamId,
             notificationType = event.eventType,
             message = event.message,
             createdAt = LocalDateTime.now().toString()

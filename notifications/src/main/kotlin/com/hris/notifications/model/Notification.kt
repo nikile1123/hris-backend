@@ -27,6 +27,8 @@ data class Notification(
     val id: UUID? = null,
     @Serializable(with = UUIDSerializer::class)
     val employeeId: UUID,
+    @Serializable(with = UUIDSerializer::class)
+    val teamId: UUID,
     val notificationType: String,
     val message: String,
     val createdAt: String? = null
