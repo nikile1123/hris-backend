@@ -17,11 +17,11 @@ CREATE TABLE employees
     supervisor_id      UUID,
     subordinates_count INTEGER      NOT NULL DEFAULT 0,
     team_id            UUID         NOT NULL,
-    CONSTRAINT fk_supervisor
+    CONSTRAINT fk_supervisor_employees
         FOREIGN KEY (supervisor_id)
             REFERENCES employees (id)
             ON DELETE SET NULL,
-    CONSTRAINT fk_team
+    CONSTRAINT fk_team_employees
         FOREIGN KEY (team_id)
             REFERENCES teams (id)
             ON DELETE RESTRICT
@@ -43,7 +43,7 @@ CREATE TABLE performance_reviews
         FOREIGN KEY (employee_id)
             REFERENCES employees (id)
             ON DELETE CASCADE,
-    CONSTRAINT fk_team
+    CONSTRAINT fk_team_review
         FOREIGN KEY (team_id)
             REFERENCES teams (id)
             ON DELETE RESTRICT

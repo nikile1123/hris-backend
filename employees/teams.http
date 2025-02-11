@@ -3,7 +3,7 @@ POST http://localhost:8081/teams
 Content-Type: application/json
 
 {
-  "name": "Scrum masters"
+  "name": "Managers"
 }
 
 ### Get All Teams

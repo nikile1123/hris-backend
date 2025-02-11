@@ -2,6 +2,7 @@ package com.hris.reviews.routes
 
 import com.hris.reviews.model.PerformanceReview
 import com.hris.reviews.model.PerformanceReviewService
+import com.hris.reviews.model.UUIDSerializer
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -10,12 +11,20 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.util.*
 
 fun Application.registerRoutes(kodein: DI) {
-    install(ContentNegotiation) { json() }
+    install(ContentNegotiation) {
+        json(Json {
+            serializersModule = SerializersModule {
+                contextual(UUID::class, UUIDSerializer)
+            }
+        })
+    }
     val reviewService by kodein.instance<PerformanceReviewService>()
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()
 
