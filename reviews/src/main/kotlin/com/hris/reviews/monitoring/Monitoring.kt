@@ -1,8 +1,8 @@
 package com.hris.reviews.monitoring
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.metrics.micrometer.*
+import io.ktor.server.plugins.callid.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.request.*
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
@@ -12,7 +12,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.kodein.di.DI
 import org.kodein.di.instance
-import org.slf4j.event.*
+import org.slf4j.event.Level
 import java.time.Duration
 
 fun Application.configureMonitoring(kodein: DI) {

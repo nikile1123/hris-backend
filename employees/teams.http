@@ -1,0 +1,26 @@
+### Create Team
+POST http://localhost:8081/teams
+Content-Type: application/json
+
+{
+  "name": "Scrum masters"
+}
+
+### Get All Teams
+GET http://localhost:8081/teams
+Content-Type: application/json
+
+### Get Team by ID
+GET http://localhost:8081/teams/<TEAM_ID>
+Content-Type: application/json
+
+### Update Team
+PUT http://localhost:8081/teams/<TEAM_ID>
+Content-Type: application/json
+
+{
+  "name": "Marketing"
+}
+
+### Delete Team
+DELETE http://localhost:8081/teams/<TEAM_ID>

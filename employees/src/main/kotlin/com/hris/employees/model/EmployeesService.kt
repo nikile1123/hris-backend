@@ -56,7 +56,7 @@ class EmployeesService(private val database: Database) {
 
     object EmployeesTable : Table("employees") {
         val id = uuid("id").clientDefault { UUID.randomUUID() }
-        val teamId = reference("id", TeamsTable.id)
+        val teamId = reference("team_id", TeamsTable.id)
         val firstName = varchar("first_name", 50)
         val lastName = varchar("last_name", 50)
         val email = varchar("email", 100).uniqueIndex()
@@ -105,7 +105,7 @@ class EmployeesService(private val database: Database) {
         val mes = "Employee ${employee.firstName} ${employee.lastName} created."
         OutboxTable.insert {
             it[employeeId] = newId
-            it[teamId] = teamId
+            it[teamId] = employee.teamId
             it[eventType] = "employee.created"
             it[message] = mes
         }
