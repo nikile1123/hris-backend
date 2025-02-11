@@ -2,6 +2,8 @@ package com.hris.employees.routes
 
 import com.hris.employees.model.Employee
 import com.hris.employees.model.EmployeesService
+import com.hris.employees.model.Team
+import com.hris.employees.model.TeamsService
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -17,6 +19,7 @@ import java.util.*
 fun Application.registerRoutes(kodein: DI) {
     install(ContentNegotiation) { json() }
     val employeesService by kodein.instance<EmployeesService>()
+    val teamsService by kodein.instance<TeamsService>()
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()
 
     routing {
@@ -85,6 +88,71 @@ fun Application.registerRoutes(kodein: DI) {
                     call.respond(HttpStatusCode.OK, "Employee deleted")
                 } else {
                     call.respond(HttpStatusCode.NotFound, "Employee not found")
+                }
+            }
+        }
+        route("/teams") {
+            get {
+                val teams = teamsService.getAllTeams()
+                call.respond(HttpStatusCode.OK, teams)
+            }
+            get("{id}") {
+                val idParam = call.parameters["id"]
+                val id = try {
+                    UUID.fromString(idParam)
+                } catch (e: Exception) {
+                    null
+                }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                    return@get
+                }
+                val team = teamsService.readTeam(id)
+                if (team == null) {
+                    call.respond(HttpStatusCode.NotFound, "Team not found")
+                } else {
+                    call.respond(HttpStatusCode.OK, team)
+                }
+            }
+            post {
+                val team = call.receive<Team>()
+                val newTeamId = teamsService.createTeam(team)
+                call.respond(
+                    HttpStatusCode.Created,
+                    mapOf("id" to newTeamId.toString())
+                )
+            }
+            put("{id}") {
+                val idParam = call.parameters["id"]
+                val id = try {
+                    UUID.fromString(idParam)
+                } catch (e: Exception) {
+                    null
+                }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                    return@put
+                }
+                val team = call.receive<Team>()
+                teamsService.updateTeam(id, team)
+                call.respond(HttpStatusCode.OK, "Team updated")
+            }
+            delete("{id}") {
+                val idParam = call.parameters["id"]
+                val id = try {
+                    UUID.fromString(idParam)
+                } catch (e: Exception) {
+                    null
+                }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                    return@delete
+                }
+                val deleted = teamsService.deleteTeam(id)
+                if (deleted) {
+                    call.respond(HttpStatusCode.OK, "Team deleted")
+                } else {
+                    call.respond(HttpStatusCode.NotFound, "Team not found")
                 }
             }
         }

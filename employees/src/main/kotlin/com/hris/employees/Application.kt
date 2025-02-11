@@ -1,6 +1,7 @@
 package com.hris.employees
 
 import com.hris.employees.model.EmployeesService
+import com.hris.employees.model.TeamsService
 import com.hris.employees.monitoring.configureMonitoring
 import com.hris.employees.routes.registerRoutes
 import io.ktor.server.application.*
@@ -28,6 +29,7 @@ fun Application.module() {
             )
         }
         bind<EmployeesService>() with singleton { EmployeesService(instance()) }
+        bind<TeamsService>() with singleton { TeamsService(instance()) }
         bind<PrometheusMeterRegistry>() with singleton {
             PrometheusMeterRegistry(
                 PrometheusConfig.DEFAULT

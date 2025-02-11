@@ -11,7 +11,6 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -32,6 +31,8 @@ object UUIDSerializer : KSerializer<UUID> {
 data class Employee(
     @Serializable(with = UUIDSerializer::class)
     val id: UUID? = null,
+    @Serializable(with = UUIDSerializer::class)
+    val teamId: UUID,
     val firstName: String,
     val lastName: String,
     val email: String,
@@ -45,8 +46,17 @@ class EmployeesService(private val database: Database) {
 
     private val logger = LoggerFactory.getLogger(EmployeesService::class.java)
 
+    object TeamsTable : Table("teams") {
+        val id = uuid("id").clientDefault { UUID.randomUUID() }
+        val name = varchar("name", 100).uniqueIndex()
+        val createdAt =
+            datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
+        override val primaryKey = PrimaryKey(id)
+    }
+
     object EmployeesTable : Table("employees") {
         val id = uuid("id").clientDefault { UUID.randomUUID() }
+        val teamId = reference("id", TeamsTable.id)
         val firstName = varchar("first_name", 50)
         val lastName = varchar("last_name", 50)
         val email = varchar("email", 100).uniqueIndex()
@@ -62,6 +72,7 @@ class EmployeesService(private val database: Database) {
         val message = varchar("message", 512)
         val processed = bool("processed").default(false)
         val employeeId = uuid("employee_id")
+        val teamId = uuid("team_id")
         val createdAt =
             datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
         override val primaryKey = PrimaryKey(id)
@@ -76,8 +87,10 @@ class EmployeesService(private val database: Database) {
             it[lastName] = employee.lastName
             it[email] = employee.email
             it[position] = employee.position
+            it[teamId] = employee.teamId
             it[supervisorId] = employee.supervisorId
         }[EmployeesTable.id]
+
         if (employee.supervisorId != null) {
             EmployeesTable.update({ EmployeesTable.id eq employee.supervisorId }) {
                 with(SqlExpressionBuilder) {
@@ -92,6 +105,7 @@ class EmployeesService(private val database: Database) {
         val mes = "Employee ${employee.firstName} ${employee.lastName} created."
         OutboxTable.insert {
             it[employeeId] = newId
+            it[teamId] = teamId
             it[eventType] = "employee.created"
             it[message] = mes
         }
@@ -104,6 +118,7 @@ class EmployeesService(private val database: Database) {
             .map {
                 Employee(
                     it[EmployeesTable.id],
+                    it[EmployeesTable.teamId],
                     it[EmployeesTable.firstName],
                     it[EmployeesTable.lastName],
                     it[EmployeesTable.email],
@@ -156,6 +171,7 @@ class EmployeesService(private val database: Database) {
                 }
             }
             EmployeesTable.update({ EmployeesTable.id eq id }) {
+                it[teamId] = employee.teamId
                 it[firstName] = employee.firstName
                 it[lastName] = employee.lastName
                 it[email] = employee.email
@@ -166,6 +182,7 @@ class EmployeesService(private val database: Database) {
                 "Employee ${employee.firstName} ${employee.lastName} updated with id $id."
             OutboxTable.insert {
                 it[employeeId] = id
+                it[teamId] = teamId
                 it[eventType] = "employee.updated"
                 it[message] = mes
             }
@@ -179,6 +196,7 @@ class EmployeesService(private val database: Database) {
         if (employeeRow == null) return@dbQuery false
         val employee = Employee(
             id = employeeRow[EmployeesTable.id],
+            teamId = employeeRow[EmployeesTable.teamId],
             firstName = employeeRow[EmployeesTable.firstName],
             lastName = employeeRow[EmployeesTable.lastName],
             email = employeeRow[EmployeesTable.email],
@@ -218,6 +236,7 @@ class EmployeesService(private val database: Database) {
                 "Employee ${employee.firstName} ${employee.lastName} deleted."
             OutboxTable.insert {
                 it[employeeId] = id
+                it[teamId] = teamId
                 it[eventType] = "employee.deleted"
                 it[message] = mes
             }
@@ -230,6 +249,7 @@ class EmployeesService(private val database: Database) {
         EmployeesTable.selectAll().map {
             Employee(
                 id = it[EmployeesTable.id],
+                teamId = it[EmployeesTable.teamId],
                 firstName = it[EmployeesTable.firstName],
                 lastName = it[EmployeesTable.lastName],
                 email = it[EmployeesTable.email],
