@@ -9,7 +9,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.1.10"
 }
 
-group = "com.example"
+group = "com.hris.notifications"
 version = "0.0.1"
 
 application {
@@ -21,6 +21,14 @@ application {
 
 repositories {
     mavenCentral()
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 dependencies {

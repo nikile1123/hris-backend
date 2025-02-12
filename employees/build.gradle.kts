@@ -10,8 +10,16 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.1.10"
 }
 
-group = "com.hris"
+group = "com.hris.employees"
 version = "0.0.1"
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+kotlin {
+    jvmToolchain(21)
+}
 
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
@@ -44,10 +52,8 @@ dependencies {
     //Test
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("org.testcontainers:testcontainers:1.20.4")
-    testImplementation("org.testcontainers:postgresql:1.20.4")
-    testImplementation("org.testcontainers:junit-jupiter:1.20.4")
-    testImplementation("org.testcontainers:rabbitmq:1.20.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
 
     //DI
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:7.25.0")
