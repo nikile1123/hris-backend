@@ -5,7 +5,7 @@ COPY --chown=gradle:gradle . .
 RUN ./gradlew :notification:shadowJar --no-daemon
 
 # Stage 2: Create a runtime image
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 WORKDIR /app
 COPY --from=builder /home/gradle/project/notifications/build/libs/*.jar app.jar
 EXPOSE 8082

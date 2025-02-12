@@ -3,7 +3,7 @@ WORKDIR /home/gradle/project
 COPY --chown=gradle:gradle . .
 RUN ./gradlew :employees:shadowJar --no-daemon
 
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 WORKDIR /app
 COPY --from=builder /home/gradle/project/employees/build/libs/*.jar app.jar
 EXPOSE 8081
