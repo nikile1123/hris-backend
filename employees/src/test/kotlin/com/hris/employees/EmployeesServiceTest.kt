@@ -152,6 +152,9 @@ class EmployeesServiceTest {
         assertEquals(mId, hierarchy.manager?.id)
         assertTrue(hierarchy.subordinates.isEmpty())
         assertEquals(2, hierarchy.colleagues.size)
-        assertEquals(cId, hierarchy.colleagues.first().id)
+
+        val colleaguesIds = hierarchy.colleagues.map { it.id }
+        assertTrue(colleaguesIds.contains(cId))
+        assertTrue(colleaguesIds.contains(mId))
     }
 }
