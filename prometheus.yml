@@ -5,15 +5,15 @@ scrape_configs:
   - job_name: 'employees'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['employee-service:8081']
+      - targets: ['employees-service:8081']
 
   - job_name: 'reviews'
     metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'review-service:8082' ]
+      - targets: [ 'reviews-service:8082' ]
 
 
   - job_name: 'notifications'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['notification-service:8083']
+      - targets: ['notifications-service:8083']

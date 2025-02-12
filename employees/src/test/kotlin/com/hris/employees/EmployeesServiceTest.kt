@@ -11,7 +11,6 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -27,9 +26,13 @@ class EmployeesServiceTest {
 
     @BeforeEach
     fun setup() {
-        database = Database.connect("jdbc:h2:mem:test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
+        database = Database.connect(
+            "jdbc:h2:mem:test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;",
+            driver = "org.h2.Driver"
+        )
         transaction(database) {
-            SchemaUtils.create(TeamsTable,
+            SchemaUtils.create(
+                TeamsTable,
                 EmployeesService.EmployeesTable, EmployeesService.OutboxTable
             )
             // Seed teams table:
@@ -45,7 +48,11 @@ class EmployeesServiceTest {
     fun teardown() {
         transaction(database) {
             // Удаляем сначала зависимые таблицы, затем родительскую
-            SchemaUtils.drop(EmployeesService.OutboxTable, EmployeesService.EmployeesTable, TeamsTable)
+            SchemaUtils.drop(
+                EmployeesService.OutboxTable,
+                EmployeesService.EmployeesTable,
+                TeamsTable
+            )
         }
     }
 
@@ -66,7 +73,10 @@ class EmployeesServiceTest {
             EmployeesService.EmployeesTable.selectAll()
                 .where { EmployeesService.EmployeesTable.id eq supId }.single()
         }
-        assertEquals(0, supRow[EmployeesService.EmployeesTable.subordinatesCount])
+        assertEquals(
+            0,
+            supRow[EmployeesService.EmployeesTable.subordinatesCount]
+        )
 
         // Создаем подчиненного с supervisorId = supId
         val subordinate = Employee(
@@ -83,38 +93,42 @@ class EmployeesServiceTest {
             EmployeesService.EmployeesTable.selectAll()
                 .where { EmployeesService.EmployeesTable.id eq supId }.single()
         }
-        assertEquals(1, supRow[EmployeesService.EmployeesTable.subordinatesCount])
+        assertEquals(
+            1,
+            supRow[EmployeesService.EmployeesTable.subordinatesCount]
+        )
     }
 
     @Test
-    fun `updateEmployee should throw exception when cycle is detected`() = runBlocking {
-        // Создаем сотрудника A (руководитель)
-        val employeeA = Employee(
-            teamId = TEAM_ID,
-            firstName = "Alice",
-            lastName = "A",
-            email = "alice@example.com",
-            position = "Manager",
-            supervisorId = null
-        )
-        val aId = service.createEmployee(employeeA)
-        // Создаем сотрудника B с supervisor A
-        val employeeB = Employee(
-            teamId = TEAM_ID,
-            firstName = "Bob",
-            lastName = "B",
-            email = "bob@example.com",
-            position = "Developer",
-            supervisorId = aId
-        )
-        val bId = service.createEmployee(employeeB)
-        // Попытка обновить сотрудника A, установив его supervisor равным B, что создаст цикл
-        val updatedA = employeeA.copy(supervisorId = bId)
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            runBlocking { service.updateEmployee(aId, updatedA) }
+    fun `updateEmployee should throw exception when cycle is detected`() =
+        runBlocking {
+            // Создаем сотрудника A (руководитель)
+            val employeeA = Employee(
+                teamId = TEAM_ID,
+                firstName = "Alice",
+                lastName = "A",
+                email = "alice@example.com",
+                position = "Manager",
+                supervisorId = null
+            )
+            val aId = service.createEmployee(employeeA)
+            // Создаем сотрудника B с supervisor A
+            val employeeB = Employee(
+                teamId = TEAM_ID,
+                firstName = "Bob",
+                lastName = "B",
+                email = "bob@example.com",
+                position = "Developer",
+                supervisorId = aId
+            )
+            val bId = service.createEmployee(employeeB)
+            // Попытка обновить сотрудника A, установив его supervisor равным B, что создаст цикл
+            val updatedA = employeeA.copy(supervisorId = bId)
+            val exception = assertThrows(IllegalArgumentException::class.java) {
+                runBlocking { service.updateEmployee(aId, updatedA) }
+            }
+            assertTrue(exception.message!!.contains("Cycle detected"))
         }
-        assertTrue(exception.message!!.contains("Cycle detected"))
-    }
 
     @Test
     fun `getEmployeeHierarchy should return correct hierarchy`() = runBlocking {
