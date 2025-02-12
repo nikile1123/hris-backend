@@ -18,17 +18,17 @@ data class Team(
     val createdAt: String? = null
 )
 
+object TeamsTable : Table("teams") {
+    val id = uuid("id").clientDefault { UUID.randomUUID() }
+    val name = varchar("name", 100).uniqueIndex()
+    val createdAt =
+        datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
+    override val primaryKey = PrimaryKey(id)
+}
+
 class TeamsService(private val database: Database) {
 
     private val logger = LoggerFactory.getLogger(EmployeesService::class.java)
-
-    object TeamsTable : Table("teams") {
-        val id = uuid("id").clientDefault { UUID.randomUUID() }
-        val name = varchar("name", 100).uniqueIndex()
-        val createdAt =
-            datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
-        override val primaryKey = PrimaryKey(id)
-    }
 
     suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO, database) { block() }

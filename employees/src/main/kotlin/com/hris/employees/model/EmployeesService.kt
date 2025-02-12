@@ -45,13 +45,6 @@ class EmployeesService(private val database: Database) {
 
     private val logger = LoggerFactory.getLogger(EmployeesService::class.java)
 
-    object TeamsTable : Table("teams") {
-        val id = uuid("id").clientDefault { UUID.randomUUID() }
-        val name = varchar("name", 100).uniqueIndex()
-        val createdAt = datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
-        override val primaryKey = PrimaryKey(id)
-    }
-
     object EmployeesTable : Table("employees") {
         val id = uuid("id").clientDefault { UUID.randomUUID() }
         val teamId = reference("team_id", TeamsTable.id)

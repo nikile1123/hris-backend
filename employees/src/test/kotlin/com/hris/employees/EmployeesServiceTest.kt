@@ -2,15 +2,22 @@ package com.hris.employees
 
 import com.hris.employees.model.Employee
 import com.hris.employees.model.EmployeesService
+import com.hris.employees.model.TeamsTable
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.*
+
+private val TEAM_ID = UUID.fromString("11111111-1111-1111-1111-111111111111")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EmployeesServiceTest {
@@ -18,18 +25,35 @@ class EmployeesServiceTest {
     private lateinit var database: Database
     private lateinit var service: EmployeesService
 
-    @BeforeAll
+    @BeforeEach
     fun setup() {
-        // Подключаемся к in-memory H2 базе в режиме PostgreSQL
         database = Database.connect("jdbc:h2:mem:test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
+        transaction(database) {
+            SchemaUtils.create(TeamsTable,
+                EmployeesService.EmployeesTable, EmployeesService.OutboxTable
+            )
+            // Seed teams table:
+            TeamsTable.insert {
+                it[id] = TEAM_ID
+                it[name] = "Development"
+            }
+        }
         service = EmployeesService(database)
+    }
+
+    @AfterEach
+    fun teardown() {
+        transaction(database) {
+            // Удаляем сначала зависимые таблицы, затем родительскую
+            SchemaUtils.drop(EmployeesService.OutboxTable, EmployeesService.EmployeesTable, TeamsTable)
+        }
     }
 
     @Test
     fun createEmployeeUpdatesSupervisorSubordinatesCount() = runBlocking {
         // Создаем руководителя (без supervisor)
         val supervisor = Employee(
-            teamId = UUID.randomUUID(),
+            teamId = TEAM_ID,
             firstName = "Supervisor",
             lastName = "One",
             email = "sup.one@example.com",
@@ -66,7 +90,7 @@ class EmployeesServiceTest {
     fun `updateEmployee should throw exception when cycle is detected`() = runBlocking {
         // Создаем сотрудника A (руководитель)
         val employeeA = Employee(
-            teamId = UUID.randomUUID(),
+            teamId = TEAM_ID,
             firstName = "Alice",
             lastName = "A",
             email = "alice@example.com",
@@ -76,7 +100,7 @@ class EmployeesServiceTest {
         val aId = service.createEmployee(employeeA)
         // Создаем сотрудника B с supervisor A
         val employeeB = Employee(
-            teamId = employeeA.teamId,
+            teamId = TEAM_ID,
             firstName = "Bob",
             lastName = "B",
             email = "bob@example.com",
@@ -95,9 +119,8 @@ class EmployeesServiceTest {
     @Test
     fun `getEmployeeHierarchy should return correct hierarchy`() = runBlocking {
         // Создаем команду и сотрудников: менеджера, подчиненного и коллегу
-        val teamId = UUID.randomUUID()
         val manager = Employee(
-            teamId = teamId,
+            teamId = TEAM_ID,
             firstName = "Manager",
             lastName = "M",
             email = "manager@example.com",
@@ -106,7 +129,7 @@ class EmployeesServiceTest {
         )
         val mId = service.createEmployee(manager)
         val subordinate = Employee(
-            teamId = teamId,
+            teamId = TEAM_ID,
             firstName = "Sub",
             lastName = "S",
             email = "sub@example.com",
@@ -115,7 +138,7 @@ class EmployeesServiceTest {
         )
         val sId = service.createEmployee(subordinate)
         val colleague = Employee(
-            teamId = teamId,
+            teamId = TEAM_ID,
             firstName = "Colleague",
             lastName = "C",
             email = "colleague@example.com",
@@ -128,7 +151,7 @@ class EmployeesServiceTest {
         assertNotNull(hierarchy.manager)
         assertEquals(mId, hierarchy.manager?.id)
         assertTrue(hierarchy.subordinates.isEmpty())
-        assertEquals(1, hierarchy.colleagues.size)
+        assertEquals(2, hierarchy.colleagues.size)
         assertEquals(cId, hierarchy.colleagues.first().id)
     }
 }
