@@ -35,7 +35,6 @@ class EmployeesServiceTest {
                 TeamsTable,
                 EmployeesService.EmployeesTable, EmployeesService.OutboxTable
             )
-            // Seed teams table:
             TeamsTable.insert {
                 it[id] = TEAM_ID
                 it[name] = "Development"
@@ -47,7 +46,6 @@ class EmployeesServiceTest {
     @AfterEach
     fun teardown() {
         transaction(database) {
-            // Удаляем сначала зависимые таблицы, затем родительскую
             SchemaUtils.drop(
                 EmployeesService.OutboxTable,
                 EmployeesService.EmployeesTable,
@@ -58,7 +56,6 @@ class EmployeesServiceTest {
 
     @Test
     fun createEmployeeUpdatesSupervisorSubordinatesCount() = runBlocking {
-        // Создаем руководителя (без supervisor)
         val supervisor = Employee(
             teamId = TEAM_ID,
             firstName = "Supervisor",
@@ -68,7 +65,6 @@ class EmployeesServiceTest {
             supervisorId = null
         )
         val supId = service.createEmployee(supervisor)
-        // Проверяем, что у руководителя подчинённых 0
         var supRow = transaction(database) {
             EmployeesService.EmployeesTable.selectAll()
                 .where { EmployeesService.EmployeesTable.id eq supId }.single()
@@ -78,7 +74,6 @@ class EmployeesServiceTest {
             supRow[EmployeesService.EmployeesTable.subordinatesCount]
         )
 
-        // Создаем подчиненного с supervisorId = supId
         val subordinate = Employee(
             teamId = supRow[EmployeesService.EmployeesTable.teamId],
             firstName = "Subordinate",
@@ -87,8 +82,7 @@ class EmployeesServiceTest {
             position = "Developer",
             supervisorId = supId
         )
-        val subId = service.createEmployee(subordinate)
-        // Перечитываем данные руководителя
+        service.createEmployee(subordinate)
         supRow = transaction(database) {
             EmployeesService.EmployeesTable.selectAll()
                 .where { EmployeesService.EmployeesTable.id eq supId }.single()
@@ -102,7 +96,6 @@ class EmployeesServiceTest {
     @Test
     fun `updateEmployee should throw exception when cycle is detected`() =
         runBlocking {
-            // Создаем сотрудника A (руководитель)
             val employeeA = Employee(
                 teamId = TEAM_ID,
                 firstName = "Alice",
@@ -112,7 +105,6 @@ class EmployeesServiceTest {
                 supervisorId = null
             )
             val aId = service.createEmployee(employeeA)
-            // Создаем сотрудника B с supervisor A
             val employeeB = Employee(
                 teamId = TEAM_ID,
                 firstName = "Bob",
@@ -122,7 +114,6 @@ class EmployeesServiceTest {
                 supervisorId = aId
             )
             val bId = service.createEmployee(employeeB)
-            // Попытка обновить сотрудника A, установив его supervisor равным B, что создаст цикл
             val updatedA = employeeA.copy(supervisorId = bId)
             val exception = assertThrows(IllegalArgumentException::class.java) {
                 runBlocking { service.updateEmployee(aId, updatedA) }
@@ -132,7 +123,6 @@ class EmployeesServiceTest {
 
     @Test
     fun `getEmployeeHierarchy should return correct hierarchy`() = runBlocking {
-        // Создаем команду и сотрудников: менеджера, подчиненного и коллегу
         val manager = Employee(
             teamId = TEAM_ID,
             firstName = "Manager",
@@ -160,7 +150,6 @@ class EmployeesServiceTest {
             supervisorId = mId
         )
         val cId = service.createEmployee(colleague)
-        // Получаем иерархию для подчиненного
         val hierarchy = service.getEmployeeHierarchy(sId)
         assertNotNull(hierarchy.manager)
         assertEquals(mId, hierarchy.manager?.id)
