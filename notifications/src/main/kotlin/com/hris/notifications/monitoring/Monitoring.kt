@@ -1,14 +1,14 @@
 package com.hris.notifications.monitoring
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.plugins.callid.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.request.*
-import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
+import io.micrometer.core.instrument.binder.jvm.*
+import io.micrometer.core.instrument.binder.system.FileDescriptorMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
+import io.micrometer.core.instrument.binder.system.UptimeMetrics
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.kodein.di.DI
@@ -45,7 +45,13 @@ fun Application.configureMonitoring(kodein: DI) {
         meterBinders = listOf(
             JvmMemoryMetrics(),
             JvmGcMetrics(),
-            ProcessorMetrics()
+            ProcessorMetrics(),
+            JvmThreadMetrics(),
+            ClassLoaderMetrics(),
+            UptimeMetrics(),
+            JvmCompilationMetrics(),
+            FileDescriptorMetrics(),
+            JvmHeapPressureMetrics(),
         )
     }
 }
