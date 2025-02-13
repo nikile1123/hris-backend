@@ -19,10 +19,10 @@ fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
 }
 
-//For openapi gen
-fun main() {
-    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
-}
+////For openapi gen
+//fun main() {
+//    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
+//}
 
 fun Application.module() {
     val kodein = DI {

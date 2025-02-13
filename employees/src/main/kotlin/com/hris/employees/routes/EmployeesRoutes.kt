@@ -10,6 +10,7 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.openapi.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -25,6 +26,18 @@ fun Application.registerRoutes(kodein: DI) {
     install(CORS) {
         anyHost()
         allowHeader(HttpHeaders.ContentType)
+    }
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            if(cause is IllegalArgumentException) {
+                call.respondText(text = "400: $cause" , status = HttpStatusCode.BadRequest)
+            } else {
+                call.respondText(text = "500: $cause" , status = HttpStatusCode.InternalServerError)
+            }
+        }
+        status(HttpStatusCode.NotFound) { call, status ->
+            call.respondText(text = "404: Page Not Found", status = status)
+        }
     }
 
     val employeesService by kodein.instance<EmployeesService>()

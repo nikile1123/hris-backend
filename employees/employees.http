@@ -23,15 +23,16 @@ Accept: application/json
 
 
 ### Обновление данных сотрудника
-PUT http://localhost:8081/employees/f0c65528-8b0a-4855-9959-d4ac667c500e
+PUT http://localhost:8081/employees/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb7
 Content-Type: application/json
 
 {
   "firstName": "Jane",
+  "teamId": "15f3868a-82b3-468f-aa14-81d9bd500658",
   "lastName": "Doe",
   "email": "jane.doe@example.com",
   "position": "Senior Developer",
-  "supervisorId": null
+  "supervisorId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 }
 
 

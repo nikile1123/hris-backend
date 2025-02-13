@@ -132,7 +132,7 @@ class EmployeesService(private val database: Database) {
             .singleOrNull()
     }
 
-    suspend fun isCycle(supervisorId: UUID?, employeeId: UUID): Boolean = dbQuery {
+    private suspend fun isCycle(supervisorId: UUID?, employeeId: UUID): Boolean = dbQuery {
         var currentSupervisorId = supervisorId
         while (currentSupervisorId != null) {
             if (currentSupervisorId == employeeId) return@dbQuery true
