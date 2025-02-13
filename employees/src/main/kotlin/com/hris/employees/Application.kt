@@ -5,6 +5,7 @@ import com.hris.employees.model.TeamsService
 import com.hris.employees.monitoring.configureMonitoring
 import com.hris.employees.routes.registerRoutes
 import io.ktor.server.application.*
+import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
@@ -17,6 +18,11 @@ import org.kodein.di.singleton
 fun main(args: Array<String>) {
     EngineMain.main(args)
 }
+
+//For openapi gen
+//fun main() {
+//    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
+//}
 
 fun Application.module() {
     val kodein = DI {
