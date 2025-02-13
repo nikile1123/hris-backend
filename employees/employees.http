@@ -8,10 +8,10 @@ POST http://localhost:8081/employees
 Content-Type: application/json
 
 {
-  "firstName": "petd4ya12d23",
+  "firstName": "petd4ya12d7823",
   "teamId": "15f3868a-82b3-468f-aa14-81d9bd500658",
   "lastName": "Doe1ds24f",
-  "email": "pedtyda4g12432.doe1@example.com",
+  "email": "pedtyda4g712432.doe1@example.com",
   "position": "Developer",
   "supervisorId": null
 }
