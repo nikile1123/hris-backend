@@ -65,7 +65,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus:1.12.13")
     implementation("io.ktor:ktor-server-metrics-micrometer")
 
-    //Doc
+    //Docs
     implementation("io.ktor:ktor-server-openapi")
     implementation("io.ktor:ktor-server-swagger")
     implementation("io.swagger.codegen.v3:swagger-codegen-generators:1.0.56")

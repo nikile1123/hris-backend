@@ -1,0 +1,216 @@
+openapi: "3.1.0"
+info:
+  title: "hris_backend API"
+  description: "hris_backend API"
+  version: "1.0.0"
+servers:
+- url: "https://hris_backend"
+paths:
+  /metrics:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /performance_reviews:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PerformanceReview"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PerformanceReview"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
+  /performance_reviews/{id}:
+    delete:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Invalid ID"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Review deleted"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Review not found"
+    get:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Invalid ID"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Review not found"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PerformanceReview"
+    put:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PerformanceReview"
+        required: true
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Invalid ID"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Review updated"
+  /performance_reviews/employee/{employeeId}:
+    get:
+      description: ""
+      parameters:
+      - name: "employeeId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Invalid employee ID"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PerformanceReview"
+components:
+  schemas:
+    PerformanceReview:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        employeeId:
+          type: "string"
+          format: "uuid"
+        teamId:
+          type: "string"
+          format: "uuid"
+        reviewDate:
+          type: "string"
+        performance:
+          type: "integer"
+          format: "int32"
+        softSkills:
+          type: "integer"
+          format: "int32"
+        independence:
+          type: "integer"
+          format: "int32"
+        aspirationForGrowth:
+          type: "integer"
+          format: "int32"
+      required:
+      - "employeeId"
+      - "teamId"
+      - "reviewDate"
+      - "performance"
+      - "softSkills"
+      - "independence"
+      - "aspirationForGrowth"
+    Map:
+      type: "object"
+      properties: {}
+    Map_String:
+      type: "string"

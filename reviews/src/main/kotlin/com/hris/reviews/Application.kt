@@ -5,6 +5,8 @@ import com.hris.reviews.model.PerformanceReviewService
 import com.hris.reviews.monitoring.configureMonitoring
 import com.hris.reviews.routes.registerRoutes
 import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.jetbrains.exposed.sql.Database
@@ -15,6 +17,11 @@ import org.kodein.di.singleton
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
+}
+
+//For openapi gen
+fun main() {
+    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
 }
 
 fun Application.module() {

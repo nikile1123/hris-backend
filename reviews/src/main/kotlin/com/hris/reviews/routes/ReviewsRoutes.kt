@@ -7,10 +7,14 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.openapi.*
+import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import org.kodein.di.DI
@@ -25,10 +29,18 @@ fun Application.registerRoutes(kodein: DI) {
             }
         })
     }
+    install(CORS) {
+        anyHost()
+        allowHeader(HttpHeaders.ContentType)
+    }
     val reviewService by kodein.instance<PerformanceReviewService>()
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()
 
     routing {
+        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
+        openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
+            codegen = StaticHtmlCodegen()
+        }
         get("/metrics") {
             call.respond(appMicrometerRegistry.scrape())
         }
