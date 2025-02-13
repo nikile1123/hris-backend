@@ -81,6 +81,7 @@ class EmployeesService(private val database: Database) {
         supervisorId = row[EmployeesTable.supervisorId]
     )
 
+    //TODO: up, down, all
     suspend fun getEmployeeHierarchy(employeeId: UUID): EmployeeHierarchy = dbQuery {
         val employee = EmployeesTable.selectAll()
             .where { EmployeesTable.id eq employeeId }

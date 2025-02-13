@@ -38,6 +38,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json")
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-config-yaml")
+    implementation("io.ktor:ktor-server-cors")
 
     // DB
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
@@ -63,4 +64,10 @@ dependencies {
     implementation("io.ktor:ktor-server-call-logging")
     implementation("io.micrometer:micrometer-registry-prometheus:1.12.13")
     implementation("io.ktor:ktor-server-metrics-micrometer")
+
+    //Doc
+    implementation("io.ktor:ktor-server-openapi")
+    implementation("io.ktor:ktor-server-swagger")
+    implementation("io.swagger.codegen.v3:swagger-codegen-generators:1.0.56")
+
 }

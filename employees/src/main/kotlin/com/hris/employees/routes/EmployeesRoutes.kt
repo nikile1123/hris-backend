@@ -8,21 +8,34 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.openapi.*
+import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.util.*
 
 fun Application.registerRoutes(kodein: DI) {
     install(ContentNegotiation) { json() }
+    install(CORS) {
+        anyHost()
+        allowHeader(HttpHeaders.ContentType)
+    }
+
     val employeesService by kodein.instance<EmployeesService>()
     val teamsService by kodein.instance<TeamsService>()
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()
 
     routing {
+        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
+        openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
+            codegen = StaticHtmlCodegen()
+        }
         get("/metrics") {
             call.respond(appMicrometerRegistry.scrape())
         }
@@ -51,7 +64,11 @@ fun Application.registerRoutes(kodein: DI) {
             }
             get("{id}/hierarchy") {
                 val idParam = call.parameters["id"]
-                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                val id = try {
+                    UUID.fromString(idParam)
+                } catch (e: Exception) {
+                    null
+                }
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                     return@get
