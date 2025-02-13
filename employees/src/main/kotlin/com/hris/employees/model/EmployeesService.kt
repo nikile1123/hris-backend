@@ -1,5 +1,6 @@
 package com.hris.employees.model
 
+import com.hris.employees.model.EmployeesService.EmployeesTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -9,6 +10,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.slf4j.LoggerFactory
@@ -81,7 +83,6 @@ class EmployeesService(private val database: Database) {
         supervisorId = row[EmployeesTable.supervisorId]
     )
 
-    //TODO: up, down, all
     suspend fun getEmployeeHierarchy(employeeId: UUID): EmployeeHierarchy = dbQuery {
         val employee = EmployeesTable.selectAll()
             .where { EmployeesTable.id eq employeeId }
@@ -99,6 +100,34 @@ class EmployeesService(private val database: Database) {
             .where { (EmployeesTable.teamId eq employee.teamId) and (EmployeesTable.id neq employeeId) }
             .map { rowToEmployee(it) }
         EmployeeHierarchy(manager, subordinates, colleagues)
+    }
+
+    suspend fun getManager(employeeId: UUID): Employee? = dbQuery {
+        val employee = EmployeesTable.selectAll()
+            .where { EmployeesTable.id eq employeeId }
+            .map { rowToEmployee(it) }
+            .singleOrNull() ?: throw IllegalArgumentException("Employee not found")
+        employee.supervisorId?.let { supId ->
+            EmployeesTable.selectAll().where { EmployeesTable.id eq supId }
+                .map { rowToEmployee(it) }
+                .singleOrNull()
+        }
+    }
+
+    suspend fun getSubordinates(employeeId: UUID): List<Employee> = dbQuery {
+        EmployeesTable.selectAll()
+            .where { EmployeesTable.supervisorId eq employeeId }
+            .map { rowToEmployee(it) }
+    }
+
+    suspend fun getColleagues(employeeId: UUID): List<Employee> = dbQuery {
+        val employee = EmployeesTable.selectAll()
+            .where { EmployeesTable.id eq employeeId }
+            .map { rowToEmployee(it) }
+            .singleOrNull() ?: throw IllegalArgumentException("Employee not found")
+        EmployeesTable.selectAll()
+            .where { (EmployeesTable.teamId eq employee.teamId) and (EmployeesTable.id neq employeeId) }
+            .map { rowToEmployee(it) }
     }
 
     suspend fun createEmployee(employee: Employee): UUID = dbQuery {
@@ -147,7 +176,10 @@ class EmployeesService(private val database: Database) {
     suspend fun updateEmployee(id: UUID, employee: Employee) {
         dbQuery {
             if (employee.supervisorId != null && isCycle(employee.supervisorId, id)) {
-                throw IllegalArgumentException("Cycle detected: supervisor is subordinate")
+                val cycleExcMes =
+                    "Cycle detected: supervisor with id:${employee.supervisorId} is subordinate for employee with id:$id"
+                logger.error(cycleExcMes)
+                throw IllegalArgumentException(cycleExcMes)
             }
             val currentSupervisorId = EmployeesTable.selectAll()
                 .where { EmployeesTable.id eq id }

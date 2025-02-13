@@ -75,6 +75,40 @@ fun Application.registerRoutes(kodein: DI) {
                     call.respond(HttpStatusCode.OK, employee)
                 }
             }
+            get("{id}/manager") {
+                val idParam = call.parameters["id"]
+                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                    return@get
+                }
+                val manager = employeesService.getManager(id)
+                if (manager == null) {
+                    call.respond(HttpStatusCode.NotFound, "Manager not found")
+                } else {
+                    call.respond(HttpStatusCode.OK, manager)
+                }
+            }
+            get("{id}/subordinates") {
+                val idParam = call.parameters["id"]
+                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                    return@get
+                }
+                val subordinates = employeesService.getSubordinates(id)
+                call.respond(HttpStatusCode.OK, subordinates)
+            }
+            get("{id}/colleagues") {
+                val idParam = call.parameters["id"]
+                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                    return@get
+                }
+                val colleagues = employeesService.getColleagues(id)
+                call.respond(HttpStatusCode.OK, colleagues)
+            }
             get("{id}/hierarchy") {
                 val idParam = call.parameters["id"]
                 val id = try {
