@@ -2,6 +2,9 @@
 GET http://localhost:8081/employees
 Accept: application/json
 
+### Сортировка, пагинация
+GET http://localhost:8081/employees/paginated?sortBy=lastName&order=desc&page=2&pageSize=10
+Accept: application/json
 
 ### Создание нового сотрудника
 POST http://localhost:8081/employees

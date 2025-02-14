@@ -33,6 +33,7 @@ services:
       FLYWAY_PASSWORD: Start#123
     volumes:
       - ./db/migration:/flyway/sql
+    #command: -connectRetries=60 -cleanDisabled=false clean migrate
     command: -connectRetries=60 migrate
 
   employees-service:

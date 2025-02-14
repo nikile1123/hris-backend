@@ -102,7 +102,7 @@ class EmployeesService(private val database: Database) {
             "lastname" -> EmployeesTable.lastName
             "email" -> EmployeesTable.email
             "position" -> EmployeesTable.position
-            "joiningDate" -> EmployeesTable.joiningDate
+            "joiningdate" -> EmployeesTable.joiningDate
             else -> EmployeesTable.joiningDate
         }
         EmployeesTable.selectAll()

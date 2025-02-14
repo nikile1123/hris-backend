@@ -16,7 +16,7 @@ CREATE TABLE employees
     position           VARCHAR(50)  NOT NULL,
     supervisor_id      UUID,
     subordinates_count INTEGER      NOT NULL DEFAULT 0,
-    joining_date           DATE NOT NULL,
+    joining_date       DATE         NOT NULL,
     team_id            UUID         NOT NULL,
     CONSTRAINT fk_supervisor_employees
         FOREIGN KEY (supervisor_id)
@@ -39,7 +39,7 @@ CREATE TABLE performance_reviews
     soft_skills           INTEGER CHECK (soft_skills BETWEEN 1 AND 10),
     independence          INTEGER CHECK (independence BETWEEN 1 AND 10),
     aspiration_for_growth INTEGER CHECK (aspiration_for_growth BETWEEN 1 AND 10),
-    team_id            UUID         NOT NULL,
+    team_id               UUID NOT NULL,
     CONSTRAINT fk_employee_review
         FOREIGN KEY (employee_id)
             REFERENCES employees (id)
