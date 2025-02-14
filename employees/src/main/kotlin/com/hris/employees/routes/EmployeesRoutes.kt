@@ -84,7 +84,7 @@ fun Application.registerRoutes(kodein: DI) {
             }
             get("paginated") {
                 val sortBy =
-                    call.request.queryParameters["sortBy"] ?: "firstName"
+                    call.request.queryParameters["sortBy"] ?: "joiningDate"
                 val orderParam = call.request.queryParameters["order"] ?: "asc"
                 val order =
                     if (orderParam.lowercase() == "desc") SortOrder.DESC else SortOrder.ASC
