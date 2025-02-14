@@ -16,6 +16,7 @@ CREATE TABLE employees
     position           VARCHAR(50)  NOT NULL,
     supervisor_id      UUID,
     subordinates_count INTEGER      NOT NULL DEFAULT 0,
+    joining_date           DATE NOT NULL,
     team_id            UUID         NOT NULL,
     CONSTRAINT fk_supervisor_employees
         FOREIGN KEY (supervisor_id)

@@ -1,6 +1,5 @@
 package com.hris.employees.model
 
-import com.hris.employees.model.EmployeesService.EmployeesTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -10,16 +9,21 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
+import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.slf4j.LoggerFactory
 import java.util.*
 
 object UUIDSerializer : KSerializer<UUID> {
-    override val descriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
-    override fun deserialize(decoder: Decoder): UUID = UUID.fromString(decoder.decodeString())
-    override fun serialize(encoder: Encoder, value: UUID) = encoder.encodeString(value.toString())
+    override val descriptor =
+        PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): UUID =
+        UUID.fromString(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: UUID) =
+        encoder.encodeString(value.toString())
 }
 
 @Serializable
@@ -32,6 +36,7 @@ data class Employee(
     val lastName: String,
     val email: String,
     val position: String,
+    val joiningDate: String,
     @Serializable(with = UUIDSerializer::class)
     val supervisorId: UUID? = null
 )
@@ -56,6 +61,7 @@ class EmployeesService(private val database: Database) {
         val position = varchar("position", 50)
         val supervisorId = reference("supervisor_id", id).nullable()
         val subordinatesCount = integer("subordinates_count").default(0)
+        val joiningDate = date("joining_date")
         override val primaryKey = PrimaryKey(id)
     }
 
@@ -66,7 +72,8 @@ class EmployeesService(private val database: Database) {
         val processed = bool("processed").default(false)
         val employeeId = uuid("employee_id")
         val teamId = uuid("team_id")
-        val createdAt = datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
+        val createdAt =
+            datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
         override val primaryKey = PrimaryKey(id)
     }
 
@@ -80,33 +87,57 @@ class EmployeesService(private val database: Database) {
         lastName = row[EmployeesTable.lastName],
         email = row[EmployeesTable.email],
         position = row[EmployeesTable.position],
-        supervisorId = row[EmployeesTable.supervisorId]
+        supervisorId = row[EmployeesTable.supervisorId],
+        joiningDate = row[EmployeesTable.joiningDate].toString()
     )
 
-    suspend fun getEmployeeHierarchy(employeeId: UUID): EmployeeHierarchy = dbQuery {
-        val employee = EmployeesTable.selectAll()
-            .where { EmployeesTable.id eq employeeId }
+    suspend fun getEmployeesSortedPaginated(
+        sortBy: String = "joiningDate",
+        order: SortOrder = SortOrder.ASC,
+        page: Int = 1,
+        pageSize: Int = 20
+    ): List<Employee> = dbQuery {
+        val sortColumn: Expression<*> = when (sortBy.lowercase()) {
+            "firstname" -> EmployeesTable.firstName
+            "lastname" -> EmployeesTable.lastName
+            "email" -> EmployeesTable.email
+            "position" -> EmployeesTable.position
+            "joiningDate" -> EmployeesTable.joiningDate
+            else -> EmployeesTable.joiningDate
+        }
+        EmployeesTable.selectAll()
+            .orderBy(sortColumn, order)
+            .limit(pageSize).offset(start = ((page - 1) * pageSize).toLong())
             .map { rowToEmployee(it) }
-            .singleOrNull() ?: throw IllegalArgumentException("Employee not found")
-        val manager = employee.supervisorId?.let { supId ->
-            EmployeesTable.selectAll().where { EmployeesTable.id eq supId }
+    }
+
+    suspend fun getEmployeeHierarchy(employeeId: UUID): EmployeeHierarchy =
+        dbQuery {
+            val employee = EmployeesTable.selectAll()
+                .where { EmployeesTable.id eq employeeId }
                 .map { rowToEmployee(it) }
                 .singleOrNull()
+                ?: throw IllegalArgumentException("Employee not found")
+            val manager = employee.supervisorId?.let { supId ->
+                EmployeesTable.selectAll().where { EmployeesTable.id eq supId }
+                    .map { rowToEmployee(it) }
+                    .singleOrNull()
+            }
+            val subordinates = EmployeesTable.selectAll()
+                .where { EmployeesTable.supervisorId eq employeeId }
+                .map { rowToEmployee(it) }
+            val colleagues = EmployeesTable.selectAll()
+                .where { (EmployeesTable.teamId eq employee.teamId) and (EmployeesTable.id neq employeeId) }
+                .map { rowToEmployee(it) }
+            EmployeeHierarchy(manager, subordinates, colleagues)
         }
-        val subordinates = EmployeesTable.selectAll()
-            .where { EmployeesTable.supervisorId eq employeeId }
-            .map { rowToEmployee(it) }
-        val colleagues = EmployeesTable.selectAll()
-            .where { (EmployeesTable.teamId eq employee.teamId) and (EmployeesTable.id neq employeeId) }
-            .map { rowToEmployee(it) }
-        EmployeeHierarchy(manager, subordinates, colleagues)
-    }
 
     suspend fun getManager(employeeId: UUID): Employee? = dbQuery {
         val employee = EmployeesTable.selectAll()
             .where { EmployeesTable.id eq employeeId }
             .map { rowToEmployee(it) }
-            .singleOrNull() ?: throw IllegalArgumentException("Employee not found")
+            .singleOrNull()
+            ?: throw IllegalArgumentException("Employee not found")
         employee.supervisorId?.let { supId ->
             EmployeesTable.selectAll().where { EmployeesTable.id eq supId }
                 .map { rowToEmployee(it) }
@@ -124,7 +155,8 @@ class EmployeesService(private val database: Database) {
         val employee = EmployeesTable.selectAll()
             .where { EmployeesTable.id eq employeeId }
             .map { rowToEmployee(it) }
-            .singleOrNull() ?: throw IllegalArgumentException("Employee not found")
+            .singleOrNull()
+            ?: throw IllegalArgumentException("Employee not found")
         EmployeesTable.selectAll()
             .where { (EmployeesTable.teamId eq employee.teamId) and (EmployeesTable.id neq employeeId) }
             .map { rowToEmployee(it) }
@@ -138,10 +170,16 @@ class EmployeesService(private val database: Database) {
             it[position] = employee.position
             it[teamId] = employee.teamId
             it[supervisorId] = employee.supervisorId
+            it[joiningDate] = java.time.LocalDate.parse(employee.joiningDate)
         }[EmployeesTable.id]
         if (employee.supervisorId != null) {
             EmployeesTable.update({ EmployeesTable.id eq employee.supervisorId }) {
-                with(SqlExpressionBuilder) { it.update(subordinatesCount, subordinatesCount + 1) }
+                with(SqlExpressionBuilder) {
+                    it.update(
+                        subordinatesCount,
+                        subordinatesCount + 1
+                    )
+                }
             }
         }
         val mes = "Employee ${employee.firstName} ${employee.lastName} created."
@@ -161,7 +199,10 @@ class EmployeesService(private val database: Database) {
             .singleOrNull()
     }
 
-    private suspend fun isCycle(supervisorId: UUID?, employeeId: UUID): Boolean = dbQuery {
+    private suspend fun isCycle(
+        supervisorId: UUID?,
+        employeeId: UUID
+    ): Boolean = dbQuery {
         var currentSupervisorId = supervisorId
         while (currentSupervisorId != null) {
             if (currentSupervisorId == employeeId) return@dbQuery true
@@ -175,7 +216,11 @@ class EmployeesService(private val database: Database) {
 
     suspend fun updateEmployee(id: UUID, employee: Employee) {
         dbQuery {
-            if (employee.supervisorId != null && isCycle(employee.supervisorId, id)) {
+            if (employee.supervisorId != null && isCycle(
+                    employee.supervisorId,
+                    id
+                )
+            ) {
                 val cycleExcMes =
                     "Cycle detected: supervisor with id:${employee.supervisorId} is subordinate for employee with id:$id"
                 logger.error(cycleExcMes)
@@ -188,12 +233,22 @@ class EmployeesService(private val database: Database) {
             if (currentSupervisorId != employee.supervisorId) {
                 if (currentSupervisorId != null) {
                     EmployeesTable.update({ EmployeesTable.id eq currentSupervisorId }) {
-                        with(SqlExpressionBuilder) { it.update(subordinatesCount, subordinatesCount - 1) }
+                        with(SqlExpressionBuilder) {
+                            it.update(
+                                subordinatesCount,
+                                subordinatesCount - 1
+                            )
+                        }
                     }
                 }
                 if (employee.supervisorId != null) {
                     EmployeesTable.update({ EmployeesTable.id eq employee.supervisorId }) {
-                        with(SqlExpressionBuilder) { it.update(subordinatesCount, subordinatesCount + 1) }
+                        with(SqlExpressionBuilder) {
+                            it.update(
+                                subordinatesCount,
+                                subordinatesCount + 1
+                            )
+                        }
                     }
                 }
             }
@@ -205,7 +260,8 @@ class EmployeesService(private val database: Database) {
                 it[position] = employee.position
                 it[supervisorId] = employee.supervisorId
             }
-            val mes = "Employee ${employee.firstName} ${employee.lastName} updated with id $id."
+            val mes =
+                "Employee ${employee.firstName} ${employee.lastName} updated with id $id."
             OutboxTable.insert {
                 it[employeeId] = id
                 it[teamId] = employee.teamId
@@ -229,18 +285,29 @@ class EmployeesService(private val database: Database) {
             }
             if (managerSupervisor != null) {
                 EmployeesTable.update({ EmployeesTable.id eq managerSupervisor }) {
-                    with(SqlExpressionBuilder) { it.update(subordinatesCount, subordinatesCount + subordinateCount) }
+                    with(SqlExpressionBuilder) {
+                        it.update(
+                            subordinatesCount,
+                            subordinatesCount + subordinateCount
+                        )
+                    }
                 }
             }
         }
         if (managerSupervisor != null) {
             EmployeesTable.update({ EmployeesTable.id eq managerSupervisor }) {
-                with(SqlExpressionBuilder) { it.update(subordinatesCount, subordinatesCount - 1) }
+                with(SqlExpressionBuilder) {
+                    it.update(
+                        subordinatesCount,
+                        subordinatesCount - 1
+                    )
+                }
             }
         }
         val deleted = EmployeesTable.deleteWhere { EmployeesTable.id eq id } > 0
         if (deleted) {
-            val mes = "Employee ${employee.firstName} ${employee.lastName} deleted."
+            val mes =
+                "Employee ${employee.firstName} ${employee.lastName} deleted."
             OutboxTable.insert {
                 it[employeeId] = id
                 it[teamId] = employee.teamId

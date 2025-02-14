@@ -17,6 +17,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
+import org.jetbrains.exposed.sql.SortOrder
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.util.*
@@ -29,10 +30,16 @@ fun Application.registerRoutes(kodein: DI) {
     }
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            if(cause is IllegalArgumentException) {
-                call.respondText(text = "400: $cause" , status = HttpStatusCode.BadRequest)
+            if (cause is IllegalArgumentException) {
+                call.respondText(
+                    text = "400: $cause",
+                    status = HttpStatusCode.BadRequest
+                )
             } else {
-                call.respondText(text = "500: $cause" , status = HttpStatusCode.InternalServerError)
+                call.respondText(
+                    text = "500: $cause",
+                    status = HttpStatusCode.InternalServerError
+                )
             }
         }
         status(HttpStatusCode.NotFound) { call, status ->
@@ -46,7 +53,7 @@ fun Application.registerRoutes(kodein: DI) {
 
     routing {
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
-        openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
+        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml") {
             codegen = StaticHtmlCodegen()
         }
         get("/metrics") {
@@ -75,9 +82,33 @@ fun Application.registerRoutes(kodein: DI) {
                     call.respond(HttpStatusCode.OK, employee)
                 }
             }
+            get("paginated") {
+                val sortBy =
+                    call.request.queryParameters["sortBy"] ?: "firstName"
+                val orderParam = call.request.queryParameters["order"] ?: "asc"
+                val order =
+                    if (orderParam.lowercase() == "desc") SortOrder.DESC else SortOrder.ASC
+                val page =
+                    call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+                val pageSize =
+                    call.request.queryParameters["pageSize"]?.toIntOrNull()
+                        ?: 20
+
+                val employees = employeesService.getEmployeesSortedPaginated(
+                    sortBy,
+                    order,
+                    page,
+                    pageSize
+                )
+                call.respond(HttpStatusCode.OK, employees)
+            }
             get("{id}/manager") {
                 val idParam = call.parameters["id"]
-                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                val id = try {
+                    UUID.fromString(idParam)
+                } catch (e: Exception) {
+                    null
+                }
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                     return@get
@@ -91,7 +122,11 @@ fun Application.registerRoutes(kodein: DI) {
             }
             get("{id}/subordinates") {
                 val idParam = call.parameters["id"]
-                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                val id = try {
+                    UUID.fromString(idParam)
+                } catch (e: Exception) {
+                    null
+                }
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                     return@get
@@ -101,7 +136,11 @@ fun Application.registerRoutes(kodein: DI) {
             }
             get("{id}/colleagues") {
                 val idParam = call.parameters["id"]
-                val id = try { UUID.fromString(idParam) } catch (e: Exception) { null }
+                val id = try {
+                    UUID.fromString(idParam)
+                } catch (e: Exception) {
+                    null
+                }
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                     return@get
