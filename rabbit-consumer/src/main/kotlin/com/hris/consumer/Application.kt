@@ -1,6 +1,8 @@
 package com.hris.consumer
 
 import com.rabbitmq.client.*
+import io.ktor.server.application.*
+import io.ktor.server.netty.*
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
 
@@ -57,7 +59,11 @@ class RabbitMQConsumer(private val queueNames: List<String>) : AutoCloseable {
     }
 }
 
-fun main() {
+fun main(args: Array<String>) {
+    EngineMain.main(args)
+}
+
+fun Application.module() {
     val queues = listOf("ui_notifications", "email_notifications")
     val consumer = RabbitMQConsumer(queues)
     Runtime.getRuntime().addShutdownHook(Thread {
@@ -67,3 +73,4 @@ fun main() {
         Thread.sleep(1000)
     }
 }
+

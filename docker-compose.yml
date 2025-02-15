@@ -70,6 +70,21 @@ services:
       - postgres
       - rabbitmq
 
+  rabbit-consumer-service:
+    build:
+      context: .
+      dockerfile: rabbit-consumer/Dockerfile
+    container_name: rabbit-consumer-service
+    environment:
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    ports:
+      - "8084:8084"
+    depends_on:
+      - rabbitmq
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
