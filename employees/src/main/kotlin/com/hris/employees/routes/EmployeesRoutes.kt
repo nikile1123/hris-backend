@@ -1,9 +1,9 @@
 package com.hris.employees.routes
 
-import com.hris.employees.model.Employee
-import com.hris.employees.model.EmployeesService
-import com.hris.employees.model.Team
-import com.hris.employees.model.TeamsService
+import com.hris.employees.service.Employee
+import com.hris.employees.service.EmployeesService
+import com.hris.employees.service.Team
+import com.hris.employees.service.TeamsService
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*

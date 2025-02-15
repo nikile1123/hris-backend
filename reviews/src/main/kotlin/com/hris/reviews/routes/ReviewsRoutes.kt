@@ -1,8 +1,8 @@
 package com.hris.reviews.routes
 
-import com.hris.reviews.model.PerformanceReview
-import com.hris.reviews.model.PerformanceReviewService
-import com.hris.reviews.model.UUIDSerializer
+import com.hris.reviews.service.PerformanceReview
+import com.hris.reviews.service.PerformanceReviewService
+import com.hris.reviews.service.UUIDSerializer
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*

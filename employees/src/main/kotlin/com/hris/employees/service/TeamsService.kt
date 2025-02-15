@@ -1,10 +1,10 @@
-package com.hris.employees.model
+package com.hris.employees.service
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.javatime.datetime
+import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -22,7 +22,7 @@ object TeamsTable : Table("teams") {
     val id = uuid("id").clientDefault { UUID.randomUUID() }
     val name = varchar("name", 100).uniqueIndex()
     val createdAt =
-        datetime("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDateTime)
+        date("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -75,4 +75,24 @@ class TeamsService(private val database: Database) {
             )
         }
     }
+
+//    suspend fun getTeamsSortedPaginated(
+//        sortBy: String = "joiningDate",
+//        order: SortOrder = SortOrder.ASC,
+//        page: Int = 1,
+//        pageSize: Int = 20
+//    ): List<Employee> = dbQuery {
+//        val sortColumn: Expression<*> = when (sortBy.lowercase()) {
+//            "firstname" -> EmployeesTable.firstName
+//            "lastname" -> EmployeesTable.lastName
+//            "email" -> EmployeesTable.email
+//            "position" -> EmployeesTable.position
+//            "joiningdate" -> EmployeesTable.joiningDate
+//            else -> EmployeesTable.joiningDate
+//        }
+//        EmployeesTable.selectAll()
+//            .orderBy(sortColumn, order)
+//            .limit(pageSize).offset(start = ((page - 1) * pageSize).toLong())
+//            .map { rowToEmployee(it) }
+//    }
 }

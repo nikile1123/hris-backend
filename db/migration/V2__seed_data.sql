@@ -1,10 +1,10 @@
 -- V2__seed_data.sql
 
-INSERT INTO teams (id, name)
-VALUES ('11111111-1111-1111-1111-111111111111', 'Development'),
-       ('22222222-2222-2222-2222-222222222222', 'QA'),
-       ('33333333-3333-3333-3333-333333333333', 'Sales'),
-       ('44444444-4444-4444-4444-444444444444', 'HR');
+INSERT INTO teams (id, name, created_at)
+VALUES ('11111111-1111-1111-1111-111111111111', 'Development', '2021-05-10'),
+       ('22222222-2222-2222-2222-222222222222', 'QA', '2021-05-10'),
+       ('33333333-3333-3333-3333-333333333333', 'Sales', '2021-05-10'),
+       ('44444444-4444-4444-4444-444444444444', 'HR', '2021-05-10');
 
 INSERT INTO employees (id, first_name, last_name, email, position,
                        supervisor_id, subordinates_count, team_id, joining_date)

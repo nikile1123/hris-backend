@@ -1,11 +1,10 @@
 package com.hris.employees
 
-import com.hris.employees.model.EmployeesService
-import com.hris.employees.model.TeamsService
+import com.hris.employees.service.EmployeesService
+import com.hris.employees.service.TeamsService
 import com.hris.employees.monitoring.configureMonitoring
 import com.hris.employees.routes.registerRoutes
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry

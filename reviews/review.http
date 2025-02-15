@@ -4,8 +4,8 @@ POST http://localhost:8083/performance_reviews
 Content-Type: application/json
 
 {
-  "employeeId": "11dc4a8e-c1f4-4684-8521-eb5716d65574",
-  "teamId": "15f3868a-82b3-468f-aa14-81d9bd500658",
+  "employeeId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+  "teamId": "11111111-1111-1111-1111-111111111111",
   "reviewDate": "2025-02-11",
   "performance": 8,
   "softSkills": 7,

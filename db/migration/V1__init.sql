@@ -4,7 +4,7 @@ CREATE TABLE teams
 (
     id         UUID PRIMARY KEY,
     name       VARCHAR(100) NOT NULL UNIQUE,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at DATE         NOT NULL
 );
 
 CREATE TABLE employees

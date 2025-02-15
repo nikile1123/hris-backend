@@ -1,12 +1,10 @@
 package com.hris.reviews
 
 
-import com.hris.reviews.model.PerformanceReviewService
+import com.hris.reviews.service.PerformanceReviewService
 import com.hris.reviews.monitoring.configureMonitoring
 import com.hris.reviews.routes.registerRoutes
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.jetbrains.exposed.sql.Database

@@ -1,8 +1,8 @@
 package com.hris.employees
 
-import com.hris.employees.model.Employee
-import com.hris.employees.model.EmployeesService
-import com.hris.employees.model.TeamsTable
+import com.hris.employees.service.Employee
+import com.hris.employees.service.EmployeesService
+import com.hris.employees.service.TeamsTable
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -62,7 +62,8 @@ class EmployeesServiceTest {
             lastName = "One",
             email = "sup.one@example.com",
             position = "Manager",
-            supervisorId = null
+            supervisorId = null,
+            joiningDate = "2021-05-10"
         )
         val supId = service.createEmployee(supervisor)
         var supRow = transaction(database) {
@@ -80,7 +81,8 @@ class EmployeesServiceTest {
             lastName = "One",
             email = "sub.one@example.com",
             position = "Developer",
-            supervisorId = supId
+            supervisorId = supId,
+            joiningDate = "2021-05-10"
         )
         service.createEmployee(subordinate)
         supRow = transaction(database) {
@@ -102,7 +104,8 @@ class EmployeesServiceTest {
                 lastName = "A",
                 email = "alice@example.com",
                 position = "Manager",
-                supervisorId = null
+                supervisorId = null,
+                joiningDate = "2021-05-10"
             )
             val aId = service.createEmployee(employeeA)
             val employeeB = Employee(
@@ -111,7 +114,8 @@ class EmployeesServiceTest {
                 lastName = "B",
                 email = "bob@example.com",
                 position = "Developer",
-                supervisorId = aId
+                supervisorId = aId,
+                joiningDate = "2021-05-10"
             )
             val bId = service.createEmployee(employeeB)
             val updatedA = employeeA.copy(supervisorId = bId)
@@ -129,7 +133,8 @@ class EmployeesServiceTest {
             lastName = "M",
             email = "manager@example.com",
             position = "Manager",
-            supervisorId = null
+            supervisorId = null,
+            joiningDate = "2021-05-10"
         )
         val mId = service.createEmployee(manager)
         val subordinate = Employee(
@@ -138,7 +143,8 @@ class EmployeesServiceTest {
             lastName = "S",
             email = "sub@example.com",
             position = "Developer",
-            supervisorId = mId
+            supervisorId = mId,
+            joiningDate = "2021-05-10"
         )
         val sId = service.createEmployee(subordinate)
         val colleague = Employee(
@@ -147,7 +153,8 @@ class EmployeesServiceTest {
             lastName = "C",
             email = "colleague@example.com",
             position = "Developer",
-            supervisorId = mId
+            supervisorId = mId,
+            joiningDate = "2021-05-10"
         )
         val cId = service.createEmployee(colleague)
         val hierarchy = service.getEmployeeHierarchy(sId)

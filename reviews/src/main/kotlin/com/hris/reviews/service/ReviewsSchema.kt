@@ -1,5 +1,6 @@
-package com.hris.reviews.model
+package com.hris.reviews.service
 
+import com.hris.reviews.service.OutboxTable.defaultExpression
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -52,7 +53,7 @@ object PerformanceReviewsTable : Table("performance_reviews") {
     val id = uuid("id").clientDefault { UUID.randomUUID() }
     val employeeId = uuid("employee_id")
     val teamId = uuid("team_id")
-    val reviewDate = date("review_date")
+    val reviewDate = date("review_date").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
     val performance = integer("performance")
     val softSkills = integer("soft_skills")
     val independence = integer("independence")
