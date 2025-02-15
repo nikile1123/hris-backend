@@ -1,0 +1,6 @@
+ktor:
+  application:
+    modules:
+      - com.hris.consumer.RoutingKt.configureRouting
+  deployment:
+    port: 8084
