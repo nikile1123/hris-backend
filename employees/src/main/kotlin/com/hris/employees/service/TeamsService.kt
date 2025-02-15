@@ -68,31 +68,30 @@ class TeamsService(private val database: Database) {
 
     suspend fun getAllTeams(): List<Team> = dbQuery {
         TeamsTable.selectAll().map {
-            Team(
-                id = it[TeamsTable.id],
-                name = it[TeamsTable.name],
-                createdAt = it[TeamsTable.createdAt].toString()
-            )
+            rowToTeam(it)
         }
     }
 
-//    suspend fun getTeamsSortedPaginated(
-//        sortBy: String = "joiningDate",
-//        order: SortOrder = SortOrder.ASC,
-//        page: Int = 1,
-//        pageSize: Int = 20
-//    ): List<Employee> = dbQuery {
-//        val sortColumn: Expression<*> = when (sortBy.lowercase()) {
-//            "firstname" -> EmployeesTable.firstName
-//            "lastname" -> EmployeesTable.lastName
-//            "email" -> EmployeesTable.email
-//            "position" -> EmployeesTable.position
-//            "joiningdate" -> EmployeesTable.joiningDate
-//            else -> EmployeesTable.joiningDate
-//        }
-//        EmployeesTable.selectAll()
-//            .orderBy(sortColumn, order)
-//            .limit(pageSize).offset(start = ((page - 1) * pageSize).toLong())
-//            .map { rowToEmployee(it) }
-//    }
+    suspend fun getTeamsSortedPaginated(
+        sortBy: String = "createdAt",
+        order: SortOrder = SortOrder.ASC,
+        page: Int = 1,
+        pageSize: Int = 20
+    ): List<Team> = dbQuery {
+        val sortColumn: Expression<*> = when (sortBy.lowercase()) {
+            "name" -> TeamsTable.name
+            "createdat" -> TeamsTable.createdAt
+            else -> TeamsTable.createdAt
+        }
+        TeamsTable.selectAll()
+            .orderBy(sortColumn, order)
+            .limit(pageSize).offset(start = ((page - 1) * pageSize).toLong())
+            .map { rowToTeam(it) }
+    }
+
+    private fun rowToTeam(row: ResultRow): Team = Team(
+        id = row[TeamsTable.id],
+        name = row[TeamsTable.name],
+        createdAt = row[TeamsTable.createdAt].toString(),
+    )
 }

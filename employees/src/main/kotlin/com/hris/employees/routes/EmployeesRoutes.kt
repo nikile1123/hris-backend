@@ -82,7 +82,7 @@ fun Application.registerRoutes(kodein: DI) {
                     call.respond(HttpStatusCode.OK, employee)
                 }
             }
-            get("paginated") {
+            get("/paginated") {
                 val sortBy =
                     call.request.queryParameters["sortBy"] ?: "joiningDate"
                 val orderParam = call.request.queryParameters["order"] ?: "asc"
@@ -226,6 +226,26 @@ fun Application.registerRoutes(kodein: DI) {
                 } else {
                     call.respond(HttpStatusCode.OK, team)
                 }
+            }
+            get("/paginated") {
+                val sortBy =
+                    call.request.queryParameters["sortBy"] ?: "joiningDate"
+                val orderParam = call.request.queryParameters["order"] ?: "asc"
+                val order =
+                    if (orderParam.lowercase() == "desc") SortOrder.DESC else SortOrder.ASC
+                val page =
+                    call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+                val pageSize =
+                    call.request.queryParameters["pageSize"]?.toIntOrNull()
+                        ?: 20
+
+                val teams = teamsService.getTeamsSortedPaginated(
+                    sortBy,
+                    order,
+                    page,
+                    pageSize
+                )
+                call.respond(HttpStatusCode.OK, teams)
             }
             post {
                 val team = call.receive<Team>()
