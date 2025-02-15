@@ -4,3 +4,7 @@ ktor:
       - com.hris.notifications.ApplicationKt.module
   deployment:
     port: 8082
+
+outbox:
+  relay:
+    delay: $?OUTBOX_RELAY_DELAY_ENV

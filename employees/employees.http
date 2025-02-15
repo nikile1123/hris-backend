@@ -27,7 +27,7 @@ Accept: application/json
 
 
 ### Обновление данных сотрудника
-PUT http://localhost:8081/employees/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb7
+PUT http://localhost:8081/employees/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
 Content-Type: application/json
 
 {

@@ -62,14 +62,16 @@ fun Application.module() {
 
 fun Application.launchOutboxRelay(kodein: DI) {
     val outboxRelayService by kodein.instance<OutboxRelayService>()
+    val delayMs = environment.config.propertyOrNull("outbox.relay.delay")?.getString()?.toLongOrNull() ?: 10000L
     launch {
         while (true) {
+            log.info(delayMs.toString())
             try {
                 outboxRelayService.processOutboxEvents()
             } catch (e: Exception) {
                 log.error("Failed to process outbox events", e)
             }
-            delay(10000L)
+            delay(delayMs)
         }
     }
 }
