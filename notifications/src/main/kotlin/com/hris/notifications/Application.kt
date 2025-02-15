@@ -7,7 +7,6 @@ import com.hris.notifications.service.OutboxRelayService
 import com.hris.notifications.service.RabbitMQNotificationSender
 import com.hris.notifications.service.RabbitMQService
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry

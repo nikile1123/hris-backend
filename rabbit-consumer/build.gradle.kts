@@ -1,5 +1,6 @@
 val kotlin_version: String by project
 val logback_version: String by project
+val rabbitmq_amqp_client_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -33,5 +34,5 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 
-    implementation("com.rabbitmq:amqp-client:5.24.0")
+    implementation("com.rabbitmq:amqp-client:$rabbitmq_amqp_client_version")
 }

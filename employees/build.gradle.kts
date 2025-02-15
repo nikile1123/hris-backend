@@ -3,6 +3,11 @@ val h2_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
 val prometheus_version: String by project
+val postgresql_version: String by project
+val kodein_version: String by project
+val junit_jupiter_version: String by project
+val micrometer_prometheus_version: String by project
+val swagger_codegen_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -46,7 +51,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
     implementation("com.h2database:h2:$h2_version")
-    implementation("org.postgresql:postgresql:42.7.4")
+    implementation("org.postgresql:postgresql:$postgresql_version")
 
     //Logging
     implementation("ch.qos.logback:logback-classic:$logback_version")
@@ -54,21 +59,21 @@ dependencies {
     //Test
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version")
 
     //DI
-    implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:7.25.0")
+    implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:$kodein_version")
 
     //Metrics
     implementation("io.ktor:ktor-server-call-id")
     implementation("io.ktor:ktor-server-call-logging")
-    implementation("io.micrometer:micrometer-registry-prometheus:1.12.13")
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometer_prometheus_version")
     implementation("io.ktor:ktor-server-metrics-micrometer")
 
     //Docs
     implementation("io.ktor:ktor-server-openapi")
     implementation("io.ktor:ktor-server-swagger")
-    implementation("io.swagger.codegen.v3:swagger-codegen-generators:1.0.56")
+    implementation("io.swagger.codegen.v3:swagger-codegen-generators:$swagger_codegen_version")
 
 }
