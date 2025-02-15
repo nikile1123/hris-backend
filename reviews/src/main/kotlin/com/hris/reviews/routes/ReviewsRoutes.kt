@@ -17,6 +17,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
+import org.jetbrains.exposed.sql.SortOrder
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.util.*
@@ -48,6 +49,26 @@ fun Application.registerRoutes(kodein: DI) {
             get {
                 val allReviews = reviewService.getAllReviews()
                 call.respond(HttpStatusCode.OK, allReviews)
+            }
+            get("paginated") {
+                val sortBy =
+                    call.request.queryParameters["sortBy"] ?: "joiningDate"
+                val orderParam = call.request.queryParameters["order"] ?: "asc"
+                val order =
+                    if (orderParam.lowercase() == "desc") SortOrder.DESC else SortOrder.ASC
+                val page =
+                    call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+                val pageSize =
+                    call.request.queryParameters["pageSize"]?.toIntOrNull()
+                        ?: 20
+
+                val reviews = reviewService.getReviewsSortedPaginated(
+                    sortBy,
+                    order,
+                    page,
+                    pageSize
+                )
+                call.respond(HttpStatusCode.OK, reviews)
             }
             get("{id}") {
                 val idParam = call.parameters["id"]

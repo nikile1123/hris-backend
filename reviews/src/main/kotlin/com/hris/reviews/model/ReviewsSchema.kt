@@ -88,6 +88,26 @@ class PerformanceReviewService(private val database: Database) {
         newId
     }
 
+    suspend fun getReviewsSortedPaginated(
+        sortBy: String = "reviewDate",
+        order: SortOrder = SortOrder.ASC,
+        page: Int = 1,
+        pageSize: Int = 20
+    ): List<PerformanceReview> = dbQuery {
+        val sortColumn: Expression<*> = when (sortBy.lowercase()) {
+            "reviewdate" -> PerformanceReviewsTable.reviewDate
+            "performance" -> PerformanceReviewsTable.performance
+            "softskills" -> PerformanceReviewsTable.softSkills
+            "independence" -> PerformanceReviewsTable.independence
+            "aspirationforgrowth" -> PerformanceReviewsTable.aspirationForGrowth
+            else -> PerformanceReviewsTable.reviewDate
+        }
+        PerformanceReviewsTable.selectAll()
+            .orderBy(sortColumn, order)
+            .limit(pageSize).offset(start = ((page - 1) * pageSize).toLong())
+            .map { rowToReview(it) }
+    }
+
     suspend fun getReviewById(id: UUID): PerformanceReview? = dbQuery {
         PerformanceReviewsTable.selectAll()
             .where { PerformanceReviewsTable.id eq id }
