@@ -56,6 +56,7 @@ dependencies {
     //Test
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("io.mockk:mockk:1.13.16")
 
     //DI
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:$kodein_version")
