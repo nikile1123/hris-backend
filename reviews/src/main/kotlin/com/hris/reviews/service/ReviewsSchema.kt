@@ -1,6 +1,5 @@
 package com.hris.reviews.service
 
-import com.hris.reviews.service.OutboxTable.defaultExpression
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -17,9 +16,14 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 object UUIDSerializer : KSerializer<UUID> {
-    override val descriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
-    override fun deserialize(decoder: Decoder): UUID = UUID.fromString(decoder.decodeString())
-    override fun serialize(encoder: Encoder, value: UUID) = encoder.encodeString(value.toString())
+    override val descriptor =
+        PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): UUID =
+        UUID.fromString(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: UUID) =
+        encoder.encodeString(value.toString())
 }
 
 @Serializable
@@ -53,7 +57,8 @@ object PerformanceReviewsTable : Table("performance_reviews") {
     val id = uuid("id").clientDefault { UUID.randomUUID() }
     val employeeId = uuid("employee_id")
     val teamId = uuid("team_id")
-    val reviewDate = date("review_date").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
+    val reviewDate =
+        date("review_date").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
     val performance = integer("performance")
     val softSkills = integer("soft_skills")
     val independence = integer("independence")
