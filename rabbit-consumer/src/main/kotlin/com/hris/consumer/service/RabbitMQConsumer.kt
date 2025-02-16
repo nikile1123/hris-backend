@@ -4,7 +4,8 @@ import com.rabbitmq.client.*
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
 
-class RabbitMQConsumer(private val queueNames: List<String>) : AutoCloseable {
+class RabbitMQConsumer(private val queueNames: List<String>) :
+    AutoCloseable {
     private val logger = LoggerFactory.getLogger(RabbitMQConsumer::class.java)
 
     private val connectionFactory: ConnectionFactory =
@@ -16,28 +17,28 @@ class RabbitMQConsumer(private val queueNames: List<String>) : AutoCloseable {
         }
 
     private val connection: Connection = connectionFactory.newConnection()
+    private val channels = mutableListOf<Channel>()
 
-    private val channels: List<Channel> = queueNames.map { queueName ->
-        val channel = connection.createChannel()
-        channel.queueDeclare(queueName, true, false, false, null)
-        logger.info("Waiting for messages in queue: $queueName")
-        val consumer = object : DefaultConsumer(channel) {
-            override fun handleDelivery(
-                consumerTag: String?,
-                envelope: Envelope,
-                properties: AMQP.BasicProperties?,
-                body: ByteArray
-            ) {
-                val message = String(body, StandardCharsets.UTF_8)
-                logger.info(
-                    "Queue: [$queueName] | Received from exchange: ${envelope.exchange}, " +
-                            "routingKey: ${envelope.routingKey}, message: $message"
-                )
-                channel.basicAck(envelope.deliveryTag, false)
+    fun start() {
+        queueNames.forEach { queueName ->
+            val channel = connection.createChannel()
+            channel.queueDeclare(queueName, true, false, false, null)
+            logger.info("Waiting for messages in queue: $queueName")
+            val consumer = object : DefaultConsumer(channel) {
+                override fun handleDelivery(
+                    consumerTag: String?,
+                    envelope: Envelope,
+                    properties: AMQP.BasicProperties?,
+                    body: ByteArray
+                ) {
+                    val message = String(body, StandardCharsets.UTF_8)
+                    logger.info("Queue: [$queueName] | Received from exchange: ${envelope.exchange}, routingKey: ${envelope.routingKey}, message: $message")
+                    channel.basicAck(envelope.deliveryTag, false)
+                }
             }
+            channel.basicConsume(queueName, false, consumer)
+            channels.add(channel)
         }
-        channel.basicConsume(queueName, false, consumer)
-        channel
     }
 
     override fun close() {

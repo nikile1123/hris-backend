@@ -1,6 +1,7 @@
 package com.hris.consumer
 
 import com.hris.consumer.service.RabbitMQConsumer
+import com.rabbitmq.client.ConnectionFactory
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 
@@ -10,7 +11,8 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     val queues = listOf("ui_notifications", "email_notifications")
-    val consumer = RabbitMQConsumer(queues)
+    val consumer = RabbitMQConsumer(
+        queues)
     Runtime.getRuntime().addShutdownHook(Thread {
         consumer.close()
     })
