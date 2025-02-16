@@ -292,7 +292,6 @@ class EmployeesServiceTest {
             outboxCount > 0,
             "Outbox should contain at least one entry after employee creation"
         )
-
     }
 
     @Test
