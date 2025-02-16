@@ -58,14 +58,21 @@ fun Application.module() {
     configureMonitoring(kodein)
     registerRoutes(kodein)
     launchOutboxRelay(kodein)
+
+    val rabbitMQService by kodein.instance<RabbitMQService>()
+    monitor.subscribe(ApplicationStopped) {
+        rabbitMQService.close()
+    }
 }
 
 fun Application.launchOutboxRelay(kodein: DI) {
     val outboxRelayService by kodein.instance<OutboxRelayService>()
-    val delayMs = environment.config.propertyOrNull("outbox.relay.delay")?.getString()?.toLongOrNull() ?: 10000L
+    val delayMs =
+        environment.config.propertyOrNull("outbox.relay.delay")?.getString()
+            ?.toLongOrNull() ?: 10000L
+
     launch {
         while (true) {
-            log.info(delayMs.toString())
             try {
                 outboxRelayService.processOutboxEvents()
             } catch (e: Exception) {

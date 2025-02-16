@@ -46,7 +46,7 @@ paths:
         "400":
           description: "Bad Request"
           content:
-            '*/*':
+            text/plain:
               schema:
                 type: "string"
               examples:
@@ -82,12 +82,18 @@ paths:
         "400":
           description: "Bad Request"
           content:
-            '*/*':
+            text/plain:
               schema:
                 type: "string"
               examples:
                 Example#1:
                   value: "Invalid ID"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Employee"
         "404":
           description: "Not Found"
           content:
@@ -97,12 +103,6 @@ paths:
               examples:
                 Example#1:
                   value: "Employee not found"
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/Employee"
     put:
       description: ""
       parameters:
@@ -127,11 +127,7 @@ paths:
               examples:
                 Example#1:
                   value: ""
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
+                Example#2:
                   value: "Invalid ID"
         "500":
           description: "Internal Server Error"
@@ -170,12 +166,16 @@ paths:
               examples:
                 Example#1:
                   value: ""
+                Example#2:
+                  value: "Invalid ID"
+        "200":
+          description: "OK"
+          content:
             '*/*':
               schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Invalid ID"
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Employee"
         "500":
           description: "Internal Server Error"
           content:
@@ -185,14 +185,6 @@ paths:
               examples:
                 Example#1:
                   value: ""
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Employee"
   /employees/{id}/hierarchy:
     get:
       description: ""
@@ -212,12 +204,14 @@ paths:
               examples:
                 Example#1:
                   value: ""
+                Example#2:
+                  value: "Invalid ID"
+        "200":
+          description: "OK"
+          content:
             '*/*':
               schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Invalid ID"
+                $ref: "#/components/schemas/EmployeeHierarchy"
         "500":
           description: "Internal Server Error"
           content:
@@ -227,12 +221,6 @@ paths:
               examples:
                 Example#1:
                   value: ""
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/EmployeeHierarchy"
   /employees/{id}/manager:
     get:
       description: ""
@@ -252,11 +240,7 @@ paths:
               examples:
                 Example#1:
                   value: ""
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
+                Example#2:
                   value: "Invalid ID"
         "500":
           description: "Internal Server Error"
@@ -267,6 +251,12 @@ paths:
               examples:
                 Example#1:
                   value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Employee"
         "404":
           description: "Not Found"
           content:
@@ -276,12 +266,6 @@ paths:
               examples:
                 Example#1:
                   value: "Manager not found"
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/Employee"
   /employees/{id}/subordinates:
     get:
       description: ""
@@ -295,12 +279,45 @@ paths:
         "400":
           description: "Bad Request"
           content:
-            '*/*':
+            text/plain:
               schema:
                 type: "string"
               examples:
                 Example#1:
                   value: "Invalid ID"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Employee"
+  /employees/paginated:
+    get:
+      description: ""
+      parameters:
+      - name: "sortBy"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "order"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "page"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+      - name: "pageSize"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+      responses:
         "200":
           description: "OK"
           content:
@@ -359,7 +376,7 @@ paths:
         "400":
           description: "Bad Request"
           content:
-            '*/*':
+            text/plain:
               schema:
                 type: "string"
               examples:
@@ -395,12 +412,18 @@ paths:
         "400":
           description: "Bad Request"
           content:
-            '*/*':
+            text/plain:
               schema:
                 type: "string"
               examples:
                 Example#1:
                   value: "Invalid ID"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Team"
         "404":
           description: "Not Found"
           content:
@@ -410,12 +433,6 @@ paths:
               examples:
                 Example#1:
                   value: "Team not found"
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/Team"
     put:
       description: ""
       parameters:
@@ -434,7 +451,7 @@ paths:
         "400":
           description: "Bad Request"
           content:
-            '*/*':
+            text/plain:
               schema:
                 type: "string"
               examples:
@@ -449,6 +466,39 @@ paths:
               examples:
                 Example#1:
                   value: "Team updated"
+  /teams/paginated:
+    get:
+      description: ""
+      parameters:
+      - name: "sortBy"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "order"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "page"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+      - name: "pageSize"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Team"
 components:
   schemas:
     Employee:
@@ -468,6 +518,8 @@ components:
           type: "string"
         position:
           type: "string"
+        joiningDate:
+          type: "string"
         supervisorId:
           type: "string"
           format: "uuid"
@@ -477,6 +529,7 @@ components:
       - "lastName"
       - "email"
       - "position"
+      - "joiningDate"
     Map:
       type: "object"
       properties: {}

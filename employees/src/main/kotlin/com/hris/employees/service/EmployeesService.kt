@@ -1,6 +1,5 @@
 package com.hris.employees.service
 
-import com.hris.employees.service.TeamsTable.defaultExpression
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -62,7 +61,8 @@ class EmployeesService(private val database: Database) {
         val position = varchar("position", 50)
         val supervisorId = reference("supervisor_id", id).nullable()
         val subordinatesCount = integer("subordinates_count").default(0)
-        val joiningDate = date("joining_date").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
+        val joiningDate =
+            date("joining_date").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
         override val primaryKey = PrimaryKey(id)
     }
 
