@@ -1,101 +1,109 @@
-# HRIS Back-End Application
+# HRIS Back-end System
 
-## Overview
+## Обзор
+Данное приложение представляет собой бэкенд-систему управления персоналом (HRIS), разработанную на Kotlin с использованием Ktor, Exposed, Kodein DI и Micrometer для метрик. Для демонстрации реализована мультимодульная структура, где каждый сервис (**employees, reviews, notifications, rabbit-consumer**) собирается и деплоится отдельно, но в рамках одного репозитория. Такая организация позволяет в дальнейшем легко разделить приложение на отдельные микросервисы.
 
-This project is a back-end implementation of a Human Resource Information System (HRIS). It is built using Kotlin, Ktor, Kodein for dependency injection, and Exposed for database interactions. The system is designed to be scalable, asynchronous, and optimized for performance. The application is organized into several modules:
-- **Employees:** Manages employee data, including personal information, organizational hierarchy (manager, subordinates, colleagues), and team membership.
-- **Performance Reviews:** Handles the performance review history of employees.
-- **Notification:** Processes notifications using RabbitMQ for performance reviews (targeted to individual employees) and team changes (targeted to the entire team).
-- **Teams:** Manages team information.
+## Архитектурные решения и сервисы
 
-## Key Features
+### **Архитектурные решения**
 
-- **Employee Information:**
-    - CRUD operations for employee data.
-    - Hierarchy endpoints for retrieving an employee's manager, subordinates, and colleagues.
-    - Dedicated endpoints to navigate up/down the organizational structure.
+#### **Мультимодульный монолит vs микросервисы**
 
-- **Performance Reviews:**
-    - Record weekly performance reviews with multiple evaluation criteria.
+**Мультимодульный монолит**:
+- **Плюсы**: упрощённая разработка, единая кодовая база, простота локального запуска и отладки.
+- **Минусы**: сложность масштабирования отдельных компонентов, потенциальные проблемы при изменениях, затрагивающих всю систему.
 
-- **Notification System:**
-    - Implements the outbox pattern to decouple business operations from notification processing.
-    - Uses RabbitMQ with topic exchanges and routing keys to route messages appropriately.
-    - Supports different notification types (e.g., email and browser UI).
+**Микросервисы (можно выделить в будущем)**:
+- **Плюсы**: гибкое масштабирование, независимое развертывание, изоляция отказов.
+- **Минусы**: сложность DevOps, необходимость надёжной коммуникации между сервисами, сложность управления данными.
 
-- **OpenAPI Documentation:**
-    - Automatic generation of OpenAPI documentation for your API endpoints.
+Для демонстрационных целей выбран **мультимодульный монолит**, но все модули атамарны и собираются отдельно, при необходимости их легко вынести в отдельные репозитории.
 
-- **Metrics & Monitoring:**
-    - Integrates Micrometer with Prometheus to expose HTTP and JVM metrics.
-    - Grafana dashboards provide real-time monitoring of key performance indicators.
+Для обеспечения надежности уведомлений используется **паттерн Transactional Outbox**. При изменении данных в основных таблицах (например, создание или обновление сотрудника, создание ревью) в рамках одной транзакции добавляется запись в таблицу **outbox**, которая одновременно является аудитом. Сервис **notifications** является имплементацией Message Relay, которая считывает эти события и отправляет нотификации в RabbitMQ в соответствующие queue и с соответсвующими routing keys.
+Таким образом гарантируется, что уведомление не потеряется и не продублируется. А также происходит изоляция логики занимающейся менеджментом ревью и сотрудников от логики отправки нотификаций пользователям.
 
-- **Containerized Deployment:**
-    - The entire system is containerized using Docker and orchestrated via docker-compose.
-    - Services include PostgreSQL (with Flyway migrations), RabbitMQ, and monitoring tools.
+---
 
-## Architectural Decisions
+### **Сервисы**
 
-- **Modular Monolith:**  
-  The application is organized into clearly defined modules (employees, reviews, notifications, teams) to ensure separation of concerns and ease of future refactoring or migration to microservices.
+#### **Employees Service**
+Отвечает за управление данными сотрудников и команд. Реализованы CRUD-операции, а также получение иерархии сотрудника (начальник, подчинённые, коллеги) и пагинация/сортировка списка сотрудников.
 
-- **Asynchronous Processing:**  
-  Kotlin coroutines and non-blocking I/O via Ktor enable high concurrency and efficient resource usage.
+#### **Reviews Service**
+CRUD-операции с перформанс-ревью и их и пагинация/сортировка. При создании ревью формируется событие в таблице **outbox**, которое затем используется для отправки персональных уведомлений сотруднику.
 
-- **Robust Data Management:**  
-  Exposed ORM is used for type-safe database interactions, and Flyway is used to manage schema migrations.
+#### **Notifications Service**
+Реализует паттерн **Transactional Outbox**: изменения в основных таблицах (**employees, reviews**) сопровождаются созданием записи в таблице **outbox**. Фоновый процесс (**Outbox Relay**) периодически считывает эти события и отправляет соответствующие уведомления через RabbitMQ с нужными **routing key**. Это гарантирует надёжную доставку уведомлений и повышает масштабируемость системы.
 
-- **Dependency Injection:**  
-  Kodein DI decouples components, facilitating testing and future modifications.
+#### **Rabbit-consumer Service**
+Клиент для RabbitMQ, который вычитывает сообщения из queue и выводит их в лог для демонстрации их получения.
 
-- **Event-Driven Notifications:**  
-  The outbox pattern is implemented to log events that are later routed through RabbitMQ based on topic routing keys.
 
-## Database Schema
 
-The database consists of the following key tables:
+## **Компоненты системы**
+Приложение развёрнуто с использованием **Docker Compose**, который содержит следующие контейнеры:
+- **Employees Service** – сервис для управления сотрудниками.
+- **Reviews Service** – сервис для работы с перформанс-ревью.
+- **Notifications Service** – сервис для обработки уведомлений (**Outbox Relay + RabbitMQ Consumer**).
+- **RabbitMQ** – брокер сообщений для уведомлений.
+- **PostgreSQL** – база данных.
+- **Prometheus & Grafana** – система мониторинга и визуализации метрик.
 
-- **teams:**
-    - **id:** UUID, primary key
-    - **name:** Unique team name
-    - **created_at:** Timestamp
+---
 
-- **employees:**
-    - **id:** UUID, primary key
-    - **first_name, last_name, email, position:** Employee details
-    - **supervisor_id:** Self-referencing foreign key
-    - **subordinates_count:** Number of direct subordinates
-    - **team_id:** Foreign key referencing `teams`
+## **Схема базы данных**
 
-- **performance_reviews:**
-    - **id:** UUID, primary key
-    - **employee_id:** Foreign key referencing `employees`
-    - **team_id:** Foreign key referencing `teams`
-    - **review_date, performance, soft_skills, independence, aspiration_for_growth:** Review details
+### **См. скрипт миграции (V1__init.sql)**
 
-- **outbox:**
-    - **id:** UUID, primary key
-    - **employee_id:** ID of the employee related to the event
-    - **team_id:** ID of the team related to the event
-    - **event_type:** Type of event (e.g., `employee.created`, `review.created`)
-    - **message:** A short textual description of the event
-    - **processed:** Flag indicating whether the event was processed
-    - **created_at:** Timestamp
 
-*Include diagrams here if available (e.g., ER diagrams, system architecture diagrams).*
 
-## Deployment
+---
 
-The project uses Docker and docker-compose for containerized deployment. The docker-compose file defines services for:
+## **Бизнес-кейсы**
 
-- **PostgreSQL** (with Flyway migrations)
-- **RabbitMQ** (with Management UI)
-- **Employee Service, Review Service, and Notification Service**
-- **Prometheus and Grafana** for monitoring
+### **1. Персональное ревью**
+**Сценарий**: при создании ревью формируется запись в **outbox**, затем Outbox Relay отправляет уведомление сотруднику.
+**Запуск**: `POST /performance_reviews` – проверить создание записи в **outbox** и отправку уведомления.
 
-### Running Locally
+### **2. Кадровые изменения**
+**Сценарий**: при изменении данных сотрудника создаётся событие в **outbox**, которое затем передаётся команде через RabbitMQ.
+**Запуск**: `POST /employees` – проверить создание записи в **outbox** и рассылку уведомлений.
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/your-username/hris-backend.git
-   cd hris-backend
+### **3. Получение иерархии сотрудника**
+**Сценарий**: запрос позволяет сотруднику получить начальника, подчинённых и коллег.
+**Запуск**: `GET /employees/{id}/hierarchy`
+
+---
+
+## **Инструкция по запуску через Docker Compose**
+
+1. **Запустить контейнеры**:
+   ```sh
+   docker-compose up -d
+   ```
+2. **Доступ к сервисам**:
+- Employees Service: `http://localhost:8081`
+- Reviews Service: `http://localhost:8082`
+- Notifications Service: `http://localhost:8083`
+- RabbitMQ Management: `http://localhost:15672` (логин: `guest`, пароль: `guest`)
+
+---
+
+## **Рекомендации по деплою и оптимизации**
+
+### **Деплой на продакшене**
+- **Load Balancer**: NGINX, HAProxy для распределения нагрузки.
+- **Кэширование**: Redis для снижения нагрузки на БД.
+- **Мониторинг**: Prometheus + Grafana для отслеживания метрик.
+- **Отказоустойчивость**: Авто-скейлинг сервисов, репликация базы данных и RabbitMQ.
+
+### **Оптимизация**
+- **PostgreSQL**: индексы на часто запрашиваемые поля (`supervisor_id`).
+- **RabbitMQ**: разные очереди для разных типов уведомлений.
+- **Сервисы**: асинхронная обработка (корутины), `Transactional Outbox` для атомарности событий.
+
+---
+
+## **Заключение**
+Проект демонстрирует комплексное HRIS-решение с поддержкой высоких нагрузок, отказоустойчивости и интеграцией с RabbitMQ. 
+
