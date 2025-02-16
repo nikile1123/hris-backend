@@ -1,5 +1,6 @@
 package com.hris.employees.service
 
+import com.hris.employees.service.EmployeesService.EmployeesTable.clientDefault
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
@@ -22,7 +23,7 @@ object TeamsTable : Table("teams") {
     val id = uuid("id").clientDefault { UUID.randomUUID() }
     val name = varchar("name", 100).uniqueIndex()
     val createdAt =
-        date("created_at").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
+        date("created_at").clientDefault({ java.time.LocalDate.now() })
     override val primaryKey = PrimaryKey(id)
 }
 

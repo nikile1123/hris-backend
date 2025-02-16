@@ -62,7 +62,7 @@ class EmployeesService(private val database: Database) {
         val supervisorId = reference("supervisor_id", id).nullable()
         val subordinatesCount = integer("subordinates_count").default(0)
         val joiningDate =
-            date("joining_date").defaultExpression(org.jetbrains.exposed.sql.javatime.CurrentDate)
+            date("joining_date").clientDefault({ java.time.LocalDate.now() })
         override val primaryKey = PrimaryKey(id)
     }
 
