@@ -4,16 +4,14 @@ import com.hris.employees.service.Employee
 import com.hris.employees.service.EmployeesService
 import com.hris.employees.service.TeamsTable
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.util.*
 
 private val TEAM_ID = UUID.fromString("11111111-1111-1111-1111-111111111111")
@@ -96,7 +94,7 @@ class EmployeesServiceTest {
     }
 
     @Test
-    fun `updateEmployee should throw exception when cycle is detected`() =
+    fun updateEmployeeShouldThrowExceptionWhenCycle() =
         runBlocking {
             val employeeA = Employee(
                 teamId = TEAM_ID,
@@ -126,7 +124,7 @@ class EmployeesServiceTest {
         }
 
     @Test
-    fun `getEmployeeHierarchy should return correct hierarchy`() = runBlocking {
+    fun getEmployeeHierarchyTest() = runBlocking {
         val manager = Employee(
             teamId = TEAM_ID,
             firstName = "Manager",
@@ -166,5 +164,185 @@ class EmployeesServiceTest {
         val colleaguesIds = hierarchy.colleagues.map { it.id }
         assertTrue(colleaguesIds.contains(cId))
         assertTrue(colleaguesIds.contains(mId))
+    }
+
+    @Test
+    fun testGetManager() = runBlocking {
+        val manager = Employee(
+            teamId = TEAM_ID,
+            firstName = "Manager",
+            lastName = "One",
+            email = "manager@example.com",
+            position = "Manager",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = null
+        )
+        val managerId = service.createEmployee(manager)
+        val subordinate = Employee(
+            teamId = TEAM_ID,
+            firstName = "Employee",
+            lastName = "Two",
+            email = "employee2@example.com",
+            position = "Developer",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = managerId
+        )
+        val subordinateId = service.createEmployee(subordinate)
+        val retrievedManager = service.getManager(subordinateId)
+        assertNotNull(retrievedManager)
+        assertEquals(managerId, retrievedManager!!.id)
+    }
+
+    @Test
+    fun testGetSubordinates() = runBlocking {
+        val manager = Employee(
+            teamId = TEAM_ID,
+            firstName = "Manager",
+            lastName = "One",
+            email = "manager@example.com",
+            position = "Manager",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = null
+        )
+        val managerId = service.createEmployee(manager)
+        val subordinate1 = Employee(
+            teamId = TEAM_ID,
+            firstName = "Subordinate",
+            lastName = "One",
+            email = "sub1@example.com",
+            position = "Developer",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = managerId
+        )
+        val subordinate2 = Employee(
+            teamId = TEAM_ID,
+            firstName = "Subordinate",
+            lastName = "Two",
+            email = "sub2@example.com",
+            position = "Developer",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = managerId
+        )
+        service.createEmployee(subordinate1)
+        service.createEmployee(subordinate2)
+        val subs = service.getSubordinates(managerId)
+        assertEquals(2, subs.size)
+    }
+
+    @Test
+    fun testGetColleagues() = runBlocking {
+        val manager = Employee(
+            teamId = TEAM_ID,
+            firstName = "Manager",
+            lastName = "One",
+            email = "manager@example.com",
+            position = "Manager",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = null
+        )
+        val managerId = service.createEmployee(manager)
+        val employee1 = Employee(
+            teamId = TEAM_ID,
+            firstName = "Employee",
+            lastName = "One",
+            email = "employee1@example.com",
+            position = "Developer",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = managerId
+        )
+        val employee2 = Employee(
+            teamId = TEAM_ID,
+            firstName = "Employee",
+            lastName = "Two",
+            email = "employee2@example.com",
+            position = "Developer",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = managerId
+        )
+        val emp1Id = service.createEmployee(employee1)
+        val emp2Id = service.createEmployee(employee2)
+        val colleagues = service.getColleagues(emp1Id)
+        assertEquals(2, colleagues.size)
+
+        val colleaguesIds = colleagues.map { it.id }
+        assertTrue(colleaguesIds.contains(emp2Id))
+        assertTrue(colleaguesIds.contains(managerId))
+    }
+
+    @Test
+    fun testCreateEmployee() = runBlocking {
+        val employee = Employee(
+            teamId = TEAM_ID,
+            firstName = "John",
+            lastName = "Doe",
+            email = "john.doe@example.com",
+            position = "Developer",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = null
+        )
+        val newId = service.createEmployee(employee)
+        val readEmp = service.readEmployee(newId)
+        assertNotNull(readEmp)
+        assertEquals("John", readEmp!!.firstName)
+
+        val outboxCount = transaction(database) {
+            EmployeesService.OutboxTable.selectAll().count()
+        }
+        assertTrue(
+            outboxCount > 0,
+            "Outbox should contain at least one entry after employee creation"
+        )
+
+    }
+
+    @Test
+    fun testGetEmployeesSortedPaginated() = runBlocking {
+        for (i in 1..50) {
+            val emp = Employee(
+                teamId = TEAM_ID,
+                firstName = "FirstName$i",
+                lastName = "LastName$i",
+                email = "employee$i@example.com",
+                position = "Position$i",
+                joiningDate = LocalDate.now().minusDays(i.toLong()).toString(),
+                supervisorId = null
+            )
+            service.createEmployee(emp)
+        }
+        val page1 = service.getEmployeesSortedPaginated(
+            sortBy = "joiningDate",
+            order = SortOrder.ASC,
+            page = 1,
+            pageSize = 10
+        )
+        val page2 = service.getEmployeesSortedPaginated(
+            sortBy = "joiningDate",
+            order = SortOrder.ASC,
+            page = 2,
+            pageSize = 10
+        )
+        assertEquals(10, page1.size)
+        assertEquals(10, page2.size)
+        assertTrue(page1[0].joiningDate <= page1[1].joiningDate)
+    }
+
+    @Test
+    fun testDeleteEmployee() = runBlocking {
+        val emp = Employee(
+            teamId = TEAM_ID,
+            firstName = "Delete",
+            lastName = "Me",
+            email = "deleteme@example.com",
+            position = "Tester",
+            joiningDate = LocalDate.now().toString(),
+            supervisorId = null
+        )
+        val empId = service.createEmployee(emp)
+        val readBefore = service.readEmployee(empId)
+        assertNotNull(readBefore)
+        val deleted = service.deleteEmployee(empId)
+        assertTrue(deleted)
+        val readAfter = service.readEmployee(empId)
+        assertNull(readAfter)
     }
 }
