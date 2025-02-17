@@ -1,44 +1,58 @@
-### Получение списка всех сотрудников
+### Получить список всех сотрудников
 GET http://localhost:8081/employees
 Accept: application/json
 
-### Сортировка, пагинация
-GET http://localhost:8081/employees/paginated?order=desc&page=1&pageSize=2
-Accept: application/json
-
-### Создание нового сотрудника
+### Создать нового сотрудника
 POST http://localhost:8081/employees
 Content-Type: application/json
 
 {
-  "firstName": "petd4yfa12d7823",
   "teamId": "11111111-1111-1111-1111-111111111111",
-  "lastName": "Doe1ds2f4f",
-  "email": "pedtyda4g7dg12d432.doe1@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
   "position": "Developer",
-  "supervisorId": null
+  "joiningDate": "2022-01-01",
+  "supervisorId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
 }
 
-
-### Получение сотрудника по ID
-GET http://localhost:8081/employees/f0c65528-8b0a-4855-9959-d4ac667c500e
+### Получить сотрудника по ID
+GET http://localhost:8081/employees/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 Accept: application/json
 
-
-### Обновление данных сотрудника
-PUT http://localhost:8081/employees/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+### Обновить данные сотрудника
+PUT http://localhost:8081/employees/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 Content-Type: application/json
 
 {
-  "firstName": "Jane",
-  "teamId": "15f3868a-82b3-468f-aa14-81d9bd500658",
+  "teamId": "11111111-1111-1111-1111-111111111111",
+  "firstName": "Johnny",
   "lastName": "Doe",
-  "email": "jane.doe@example.com",
+  "email": "johnny.doe@example.com",
   "position": "Senior Developer",
-  "supervisorId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+  "joiningDate": "2022-01-01",
+  "supervisorId": null
 }
 
+### Удалить сотрудника
+DELETE http://localhost:8081/employees/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 
-### Удаление сотрудника
-DELETE http://localhost:8081/employees/f0c65528-8b0a-4855-9959-d4ac667c500e
+### Получить иерархию сотрудника
+GET http://localhost:8081/employees/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/hierarchy
+Accept: application/json
+
+### Получить коллег сотрудника
+GET http://localhost:8081/employees/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/colleagues
+Accept: application/json
+
+### Получить менеджера сотрудника
+GET http://localhost:8081/employees/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/manager
+Accept: application/json
+
+### Получить подчинённых сотрудника
+GET http://localhost:8081/employees/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/subordinates
+Accept: application/json
+
+### Получить сотрудников с пагинацией и сортировкой
+GET http://localhost:8081/employees/paginated?sortBy=joiningDate&order=asc&page=1&pageSize=20
 Accept: application/json

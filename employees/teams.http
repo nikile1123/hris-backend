@@ -1,26 +1,30 @@
-### Create Team
+### Получить список всех команд
+GET http://localhost:8081/teams
+Accept: application/json
+
+### Создать новую команду
 POST http://localhost:8081/teams
 Content-Type: application/json
 
 {
-  "name": "Managfers"
+  "name": "Development"
 }
 
-### Get All Teams
-GET http://localhost:8081/teams
-Content-Type: application/json
+### Получить команду по ID
+GET http://localhost:8081/teams/11111111-1111-1111-1111-111111111111
+Accept: application/json
 
-### Get Team by ID
-GET http://localhost:8081/teams/<TEAM_ID>
-Content-Type: application/json
-
-### Update Team
-PUT http://localhost:8081/teams/<TEAM_ID>
+### Обновить данные команды
+PUT http://localhost:8081/teams/11111111-1111-1111-1111-111111111111
 Content-Type: application/json
 
 {
-  "name": "Marketing"
+  "name": "Development Team"
 }
 
-### Delete Team
-DELETE http://localhost:8081/teams/<TEAM_ID>
+### Удалить команду
+DELETE http://localhost:8081/teams/11111111-1111-1111-1111-111111111111
+
+### Получить команды с пагинацией и сортировкой
+GET http://localhost:8081/teams/paginated?sortBy=createdAt&order=asc&page=1&pageSize=20
+Accept: application/json
