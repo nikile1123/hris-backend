@@ -1,6 +1,5 @@
 package com.hris.employees.service
 
-import com.hris.employees.service.TeamsTable.createdAt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -134,6 +133,7 @@ class EmployeesService(private val database: Database) {
                 .map { rowToEmployee(it) }
             EmployeeHierarchy(manager, subordinates, colleagues)
         }
+
 
     suspend fun getManager(employeeId: UUID): Employee? = dbQuery {
         val employee = EmployeesTable.selectAll()

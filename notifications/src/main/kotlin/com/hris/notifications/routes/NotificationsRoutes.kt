@@ -15,9 +15,6 @@ fun Application.registerRoutes(kodein: DI) {
 
     routing {
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
-//        openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
-//            codegen = StaticHtmlCodegen()
-//        }
         get("/metrics") {
             call.respond(appMicrometerRegistry.scrape())
         }

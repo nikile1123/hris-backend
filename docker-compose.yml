@@ -16,7 +16,7 @@ services:
     image: wrouesnel/postgres_exporter:latest
     container_name: postgres_exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:Start#123@postgres:5432/hris?sslmode=disable"
+      - DATA_SOURCE_NAME=postgresql://postgres:Start%23123@postgres:5432/postgres?sslmode=disable
     ports:
       - "9187:9187"
     depends_on:
