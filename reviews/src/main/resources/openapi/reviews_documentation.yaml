@@ -1,10 +1,10 @@
 openapi: "3.1.0"
 info:
-  title: "hris_backend API"
-  description: "hris_backend API"
-  version: "0.0.1"
+  title: "Reviews service API"
+  description: "Reviews service API"
+  version: "1.0.0"
 servers:
-- url: "https://localhost:8083"
+- url: "https://http://localhost:8082"
 paths:
   /metrics:
     get:
@@ -165,6 +165,39 @@ paths:
               examples:
                 Example#1:
                   value: "Invalid employee ID"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PerformanceReview"
+  /performance_reviews/paginated:
+    get:
+      description: ""
+      parameters:
+      - name: "sortBy"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "order"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "page"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+      - name: "pageSize"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+      responses:
         "200":
           description: "OK"
           content:

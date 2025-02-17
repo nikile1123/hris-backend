@@ -1,10 +1,10 @@
 openapi: "3.1.0"
 info:
-  title: "hris_backend API"
-  description: "hris_backend API"
-  version: "1.0.0"
+  title: "Notifications service API"
+  description: "Notifications service API"
+  version: "0.0.1"
 servers:
-- url: "https://hris_backend"
+- url: "https://localhost:8083"
 paths:
   /metrics:
     get:

@@ -50,8 +50,8 @@ fun Application.registerRoutes(kodein: DI) {
     val appMicrometerRegistry by kodein.instance<PrometheusMeterRegistry>()
 
     routing {
-        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
-        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml") {
+        swaggerUI(path = "swagger", swaggerFile = "openapi/employees_documentation.yaml")
+        openAPI(path = "openapi", swaggerFile = "openapi/employees_documentation.yaml") {
             codegen = StaticHtmlCodegen()
         }
         get("/metrics") { call.respond(appMicrometerRegistry.scrape()) }
