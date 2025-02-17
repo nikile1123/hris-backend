@@ -129,35 +129,35 @@ CRUD-операции с перформанс-ревью и их и пагина
 Результаты тестирования:
 
 ```
-     ✓ employee updated
      ✓ hierarchy retrieved
-     ✓ employees list retrieved
      ✓ review created
+     ✓ employee updated
+     ✓ employees list retrieved
 
-     checks.........................: 100.00% 126155 out of 126155
-     data_received..................: 63 GB   91 MB/s
-     data_sent......................: 31 MB   45 kB/s
-     dropped_iterations.............: 192     0.277674/s
-     http_req_blocked...............: avg=6.95µs   min=0s     med=3µs     max=25.96ms p(90)=6µs      p(95)=8µs     
-     http_req_connecting............: avg=2.56µs   min=0s     med=0s      max=16.44ms p(90)=0s       p(95)=0s      
-     http_req_duration..............: avg=222.84ms min=1.07ms med=67.39ms max=3.15s   p(90)=624.79ms p(95)=852.18ms
-       { expected_response:true }...: avg=222.84ms min=1.07ms med=67.39ms max=3.15s   p(90)=624.79ms p(95)=852.18ms
-     http_req_failed................: 0.00%   0 out of 136165
-     http_req_receiving.............: avg=158.17ms min=5µs    med=9.35ms  max=2.96s   p(90)=467.1ms  p(95)=648.76ms
-     http_req_sending...............: avg=14.66µs  min=2µs    med=12µs    max=5.66ms  p(90)=22µs     p(95)=30µs    
+     checks.........................: 100.00% 131583 out of 131583
+     data_received..................: 68 GB   99 MB/s
+     data_sent......................: 32 MB   46 kB/s
+     dropped_iterations.............: 202     0.292228/s
+     http_req_blocked...............: avg=5.5µs    min=0s     med=3µs     max=19.58ms p(90)=6µs      p(95)=8µs     
+     http_req_connecting............: avg=1.32µs   min=0s     med=0s      max=7.65ms  p(90)=0s       p(95)=0s      
+     http_req_duration..............: avg=173.04ms min=1.01ms med=45.26ms max=3.68s   p(90)=533.95ms p(95)=745.54ms
+       { expected_response:true }...: avg=173.04ms min=1.01ms med=45.26ms max=3.68s   p(90)=533.95ms p(95)=745.54ms
+     http_req_failed................: 0.00%   0 out of 141593
+     http_req_receiving.............: avg=118.89ms min=6µs    med=5.78ms  max=3.33s   p(90)=398.59ms p(95)=557.77ms
+     http_req_sending...............: avg=15.42µs  min=2µs    med=12µs    max=19.37ms p(90)=23µs     p(95)=32µs    
      http_req_tls_handshaking.......: avg=0s       min=0s     med=0s      max=0s      p(90)=0s       p(95)=0s      
-     http_req_waiting...............: avg=64.65ms  min=1.05ms med=33.93ms max=1.69s   p(90)=160.86ms p(95)=235.44ms
-     http_reqs......................: 136165  196.924051/s
-     iteration_duration.............: avg=1.24s    min=1s     med=1.08s   max=4.15s   p(90)=1.64s    p(95)=1.88s   
-     iterations.....................: 126155  182.447426/s
-     vus............................: 46      min=0                max=578
-     vus_max........................: 641     min=450              max=641
+     http_req_waiting...............: avg=54.13ms  min=993µs  med=22.22ms max=2.1s    p(90)=135ms    p(95)=208.19ms
+     http_reqs......................: 141593  204.839034/s
+     iteration_duration.............: avg=1.18s    min=1s     med=1.05s   max=4.68s   p(90)=1.55s    p(95)=1.77s   
+     iterations.....................: 131583  190.357819/s
+     vus............................: 37      min=0                max=594
+     vus_max........................: 651     min=450              max=651
 
 
-running (11m31.5s), 0000/0641 VUs, 126155 complete and 0 interrupted iterations
-createReviews   ✓ [======================================] 0000/0246 VUs  5m0s  010.16 iters/s
+running (11m31.2s), 0000/0651 VUs, 131583 complete and 0 interrupted iterations
+createReviews   ✓ [======================================] 0000/0266 VUs  5m0s  010.16 iters/s
 soakEmployees   ✓ [======================================] 50 VUs         10m0s
-spikeUpdates    ✓ [======================================] 0000/0145 VUs  30s   100.00 iters/s
+spikeUpdates    ✓ [======================================] 0000/0135 VUs  30s   100.00 iters/s
 stressHierarchy ✓ [======================================] 000/300 VUs    6m0s 
 
 ```
