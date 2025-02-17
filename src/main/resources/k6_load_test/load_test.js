@@ -16,6 +16,7 @@ function randomItem(arr) {
 }
 
 export let options = {
+  setupTimeout: '180s',
   scenarios: {
     createReviews: {
       executor: 'ramping-arrival-rate',
@@ -100,7 +101,6 @@ export function setup() {
       lastName: `LastName${i}`,
       email: `employee${i}@example.com`,
       position: "Developer",
-      joiningDate: new Date().toISOString().split('T')[0],
       supervisorId: supervisorId
     });
     let params = { headers: { "Content-Type": "application/json" } };

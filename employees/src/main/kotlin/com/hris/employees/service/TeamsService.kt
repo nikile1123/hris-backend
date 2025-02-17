@@ -8,6 +8,8 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -23,7 +25,7 @@ object TeamsTable : Table("teams") {
     val id = uuid("id").clientDefault { UUID.randomUUID() }
     val name = varchar("name", 100).uniqueIndex()
     val createdAt =
-        date("created_at").clientDefault({ java.time.LocalDate.now() })
+        date("created_at").clientDefault({ LocalDate.now() })
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -37,6 +39,11 @@ class TeamsService(private val database: Database) {
     suspend fun createTeam(team: Team): UUID = dbQuery {
         val newId = TeamsTable.insert {
             it[name] = team.name
+            it[createdAt] = if (team.createdAt != null) {
+                LocalDate.parse(team.createdAt)
+            } else {
+                LocalDate.now()
+            }
         }[TeamsTable.id]
         logger.info("Created team with id: $newId")
         newId

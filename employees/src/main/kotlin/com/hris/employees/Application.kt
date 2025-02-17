@@ -4,6 +4,8 @@ import com.hris.employees.monitoring.configureMonitoring
 import com.hris.employees.routes.registerRoutes
 import com.hris.employees.service.EmployeesService
 import com.hris.employees.service.TeamsService
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 import io.micrometer.prometheus.PrometheusConfig
@@ -23,14 +25,27 @@ fun main(args: Array<String>) {
 //    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
 //}
 
+fun createHikariDataSource(): HikariDataSource {
+    val config = HikariConfig().apply {
+        jdbcUrl = System.getenv("DATABASE_URL")
+            ?: "jdbc:postgresql://localhost:5432/hris"
+        username = System.getenv("DATABASE_USER") ?: "postgres"
+        password = System.getenv("DATABASE_PASSWORD") ?: "Start#123"
+        driverClassName = "org.postgresql.Driver"
+        maximumPoolSize = 20
+        minimumIdle = 5
+        connectionTimeout = 30000
+        idleTimeout = 600000
+        maxLifetime = 1800000
+    }
+    return HikariDataSource(config)
+}
+
 fun Application.module() {
     val kodein = DI {
         bind<Database>() with singleton {
             Database.connect(
-                url = System.getenv("DATABASE_URL")
-                    ?: "jdbc:postgresql://localhost:5432/hris",
-                user = System.getenv("DATABASE_USER") ?: "postgres",
-                password = System.getenv("DATABASE_PASSWORD") ?: "Start#123"
+                createHikariDataSource()
             )
         }
         bind<EmployeesService>() with singleton { EmployeesService(instance()) }

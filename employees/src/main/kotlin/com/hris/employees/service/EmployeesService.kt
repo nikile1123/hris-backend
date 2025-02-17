@@ -1,5 +1,6 @@
 package com.hris.employees.service
 
+import com.hris.employees.service.TeamsTable.createdAt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -13,6 +14,7 @@ import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
 
 object UUIDSerializer : KSerializer<UUID> {
@@ -36,7 +38,7 @@ data class Employee(
     val lastName: String,
     val email: String,
     val position: String,
-    val joiningDate: String,
+    val joiningDate: String? = null,
     @Serializable(with = UUIDSerializer::class)
     val supervisorId: UUID? = null
 )
@@ -171,7 +173,11 @@ class EmployeesService(private val database: Database) {
             it[position] = employee.position
             it[teamId] = employee.teamId
             it[supervisorId] = employee.supervisorId
-            it[joiningDate] = java.time.LocalDate.parse(employee.joiningDate)
+            it[joiningDate] = if (employee.joiningDate != null) {
+                LocalDate.parse(employee.joiningDate)
+            } else {
+                LocalDate.now()
+            }
         }[EmployeesTable.id]
         if (employee.supervisorId != null) {
             EmployeesTable.update({ EmployeesTable.id eq employee.supervisorId }) {

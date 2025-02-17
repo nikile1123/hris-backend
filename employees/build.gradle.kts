@@ -8,6 +8,7 @@ val kodein_version: String by project
 val junit_jupiter_version: String by project
 val micrometer_prometheus_version: String by project
 val swagger_codegen_version: String by project
+val hikari_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -52,6 +53,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
     implementation("com.h2database:h2:$h2_version")
     implementation("org.postgresql:postgresql:$postgresql_version")
+    implementation("org.jetbrains.exposed:exposed-json:$exposed_version")
+    implementation("com.zaxxer:HikariCP:$hikari_version")
 
     //Logging
     implementation("ch.qos.logback:logback-classic:$logback_version")
